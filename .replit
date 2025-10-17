@@ -1,5 +1,6 @@
-run = "npm install --silent && npm run dev"
-
+# .replit (чистый TOML, без EOF и т.п.)
+cat > .replit <<'EOF'
+run = "bash run.sh"
 entrypoint = "package.json"
 
 [env]
@@ -12,3 +13,20 @@ command = ["/bin/bash", "-lc"]
 
 [packager]
 packageManager = "npm"
+EOF
+
+# run.sh
+cat > run.sh <<'EOF'
+#!/usr/bin/env bash
+set -e
+# ставим зависимости один раз
+if [ ! -d node_modules ]; then
+  npm ci || npm install
+fi
+# Запуск Next на нужном хосте/порту
+export PORT="${PORT:-3000}"
+exec npm run dev
+EOF
+
+chmod +x run.sh
+sed -i 's/\r$//' .replit run.sh
