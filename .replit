@@ -1,5 +1,4 @@
-run = "npm install --silent && npm run dev"
-
+run = "bash run.sh"
 entrypoint = "package.json"
 
 [env]
