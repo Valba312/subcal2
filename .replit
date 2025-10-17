@@ -1,5 +1,5 @@
-cat > .replit <<'TOML'
-run = "bash run.sh"
+run = "npm install --silent && npm run dev"
+
 entrypoint = "package.json"
 
 [env]
@@ -11,6 +11,4 @@ NODE_OPTIONS = "--max_old_space_size=2048"
 command = ["/bin/bash", "-lc"]
 
 [packager]
-TOML
-
-# нормализуем переводы строкsed -i 's/\r$//' .replitpackageManager = "npm"
+packageManager = "npm"
