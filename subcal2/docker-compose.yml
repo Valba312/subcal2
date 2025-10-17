@@ -1,0 +1,10 @@
+services:
+  app:
+    build: .
+    ports:
+      - "3000:3000"
+    environment:
+      - DATABASE_URL=file:./prisma/dev.db
+    volumes:
+      - ./:/app
+    command: sh -c "npm install && npx prisma generate && npx prisma migrate dev --name init && npm run dev"
