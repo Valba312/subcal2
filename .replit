@@ -1,6 +1,5 @@
-run = "npm install --silent && npm run dev"
-
-entrypoint = "package.json"
+run = "cd subcal2 && npm install --silent && npm run dev"
+entrypoint = "subcal2/package.json"
 
 [env]
 PORT = "3000"
