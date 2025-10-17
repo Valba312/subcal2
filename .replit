@@ -1,9 +1,6 @@
-run = "node index.js"
+run = "bash -lc \"nix-shell -p nodejs-18_x --run 'npm start'\""
 entrypoint = "package.json"
 
 [env]
 PORT = "3000"
 NEXT_TELEMETRY_DISABLED = "1"
-
-[agent]
-expertMode = true
