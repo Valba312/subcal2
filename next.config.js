@@ -1,11 +1,11 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  experimental: {
-    serverActions: { allowedOrigins: ['*'] }
+  reactStrictMode: true,
+  async headers() {
+    if (process.env.NODE_ENV !== "production") {
+      return [{ source: "/:path*", headers: [{ key: "Cache-Control", value: "no-store" }] }];
+    }
+    return [];
   },
-  i18n: {
-    locales: ['ru', 'en'],
-    defaultLocale: 'ru'
-  }
-}
-module.exports = nextConfig
+};
+module.exports = nextConfig;
