@@ -32,7 +32,7 @@ const checklist = [
 
 export default function Home() {
   return (
-    <div className="relative min-h-full overflow-hidden bg-gradient-to-b from-slate-50 via-white to-slate-100 dark:from-slate-900 dark:via-slate-900 dark:to-slate-950">
+    <div className="relative min-h-full overflow-hidden bg-gradient-to-br from-[#ebe8ff] via-white to-[#e6f7ff] dark:from-slate-900 dark:via-slate-900 dark:to-slate-950">
       <BackgroundAccent />
       <section className="relative z-10 py-16 md:py-24">
         <div className="container flex max-w-6xl flex-col gap-16">
@@ -50,13 +50,22 @@ function BackgroundAccent() {
   return (
     <div
       aria-hidden
-      className="pointer-events-none absolute inset-0 opacity-80 [mask-image:radial-gradient(70rem_40rem_at_50%_-10%,#000_30%,transparent_70%)]"
+      className="pointer-events-none absolute inset-0"
     >
+      <div className="absolute inset-0 bg-gradient-to-b from-primary/10 via-transparent to-accent/10 opacity-70 dark:opacity-60" />
+      <div className="absolute inset-0 bg-[radial-gradient(70rem_40rem_at_50%_-10%,rgba(124,58,237,0.25),transparent_70%)]" />
       <div
-        className="absolute -top-40 left-1/2 h-[42rem] w-[42rem] -translate-x-1/2 rounded-full blur-3xl"
+        className="absolute -top-48 left-1/2 h-[46rem] w-[46rem] -translate-x-1/2 rounded-full opacity-80 blur-3xl md:opacity-90"
         style={{
           background:
             "conic-gradient(at 50% 50%, hsl(262 83% 58%) 0deg, hsl(189 92% 48%) 140deg, hsl(160 80% 55%) 240deg, hsl(262 83% 58%) 360deg)",
+        }}
+      />
+      <div
+        className="absolute -bottom-40 right-1/3 h-[30rem] w-[30rem] rounded-full opacity-70 blur-3xl md:opacity-80"
+        style={{
+          background:
+            "radial-gradient(circle at 30% 30%, rgba(14,165,233,0.35), transparent 60%)",
         }}
       />
     </div>
