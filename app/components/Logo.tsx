@@ -9,7 +9,7 @@ export default function Logo({ withText=false }: { withText?: boolean }) {
         </defs>
         <path fill="url(#g)" d="M4 7c0-2.2 2-4 5-4h6a1 1 0 010 2H9c-1.7 0-3 .9-3 2s1.3 2 3 2h6c3 0 5 1.8 5 4s-2 4-5 4H9a1 1 0 010-2h6c1.7 0 3-.9 3-2s-1.3-2-3-2H9C6 9 4 8 4 7z"/>
       </svg>
-      {withText && <span className="font-extrabold text-lg tracking-tight">Subwave</span>}
+      {withText && <span className="font-extrabold text-lg tracking-tight">SubKeeper</span>}
     </div>
   );
 }

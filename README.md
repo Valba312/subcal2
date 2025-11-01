@@ -1,4 +1,4 @@
-# Калькулятор подписок
+# SubKeeper — калькулятор подписок
 
 Next.js 14 (App Router) + TypeScript, Tailwind, shadcn/ui-style, Prisma + SQLite, Zustand, react-hook-form + zod, i18n (ru/en), Chart.js, Vitest.
 
@@ -12,6 +12,7 @@ npx prisma migrate dev --name init
 npm run seed
 npm run dev
 # http://localhost:3000
+# главная — лендинг SubKeeper, калькулятор — /calculator
 ```
 
 ### Docker

@@ -1,20 +1,20 @@
 // app/layout.tsx
 import "./globals.css";
 import type { Metadata } from "next";
-// Если есть шапка:
-// import Header from "@/components/Header";
+import Header from "./components/Header";
 
 export const metadata: Metadata = {
-  title: "Калькулятор подписок",
-  description: "Управление подписками и расчет ежемесячных/годовых затрат",
+  title: "SubKeeper — калькулятор подписок",
+  description:
+    "SubKeeper помогает управлять подписками, считать ежемесячные и годовые расходы и находить точки экономии.",
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="ru">
-      <body className="min-h-dvh bg-white text-slate-900 antialiased dark:bg-slate-950 dark:text-white">
-        {/* <Header /> */}
-        {children}
+      <body className="flex min-h-dvh flex-col bg-white text-slate-900 antialiased dark:bg-slate-950 dark:text-white">
+        <Header />
+        <main className="flex-1">{children}</main>
       </body>
     </html>
   );
