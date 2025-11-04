@@ -1,1 +1,7 @@
 node_modules
+<<<<<<< Updated upstream
+=======
+.next
+.env.local
+.env.local
+>>>>>>> Stashed changes
