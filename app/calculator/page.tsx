@@ -1,36 +1,21 @@
 "use client";
 
+import Link from "next/link";
 import { useMemo, useState } from "react";
-import { Plus, Trash2 } from "lucide-react";
-
-type FrequencyOption = {
-  value: "monthly" | "quarterly" | "semiannual" | "yearly" | "custom";
-  label: string;
-  months: number;
-};
-
-type Subscription = {
-  id: number;
-  name: string;
-  cost: number;
-  currency: string;
-  months: number;
-  frequencyLabel: string;
-};
-
-const FREQUENCIES: FrequencyOption[] = [
-  { value: "monthly", label: "Ежемесячно", months: 1 },
-  { value: "quarterly", label: "Ежеквартально", months: 3 },
-  { value: "semiannual", label: "Раз в полгода", months: 6 },
-  { value: "yearly", label: "Ежегодно", months: 12 },
-  { value: "custom", label: "Своя периодичность", months: 1 },
-];
-
-const DEFAULT_SUBSCRIPTIONS: Subscription[] = [
-  { id: 1, name: "Netflix Premium", cost: 599, currency: "₽", months: 1, frequencyLabel: "Ежемесячно" },
-  { id: 2, name: "Spotify Family", cost: 269, currency: "₽", months: 1, frequencyLabel: "Ежемесячно" },
-  { id: 3, name: "Adobe Creative Cloud", cost: 3299, currency: "₽", months: 1, frequencyLabel: "Ежемесячно" },
-];
+import { LineChart, Plus, Trash2 } from "lucide-react";
+import {
+  FREQUENCIES,
+  FrequencyOption,
+  Subscription,
+  capitalizeFirstLetter,
+  dayMonthFormatter,
+  formatDaysLeft,
+  formatMoney,
+  getDateInputValue,
+  isValidDate,
+} from "../../lib/subscriptions";
+import { computeSubscriptionAnalytics } from "../../lib/subscription-analytics";
+import { useSubscriptions } from "../../hooks/useSubscriptions";
 
 type FormState = {
   name: string;
@@ -38,35 +23,31 @@ type FormState = {
   currency: string;
   frequency: FrequencyOption["value"];
   customMonths: string;
+  nextPaymentDate: string;
 };
 
-const initialForm: FormState = {
+const createInitialFormState = (): FormState => ({
   name: "",
   cost: "",
   currency: "₽",
   frequency: "monthly",
   customMonths: "1",
-};
+  nextPaymentDate: getDateInputValue(new Date()),
+});
 
 export default function CalculatorPage() {
-  const [subscriptions, setSubscriptions] = useState<Subscription[]>(DEFAULT_SUBSCRIPTIONS);
-  const [form, setForm] = useState<FormState>(initialForm);
+  const { subscriptions, addSubscription, removeSubscription } = useSubscriptions();
+  const [form, setForm] = useState<FormState>(() => createInitialFormState());
   const [error, setError] = useState<string | null>(null);
 
-  const totals = useMemo(() => {
-    const monthly: Record<string, number> = {};
+  const analytics = useMemo(
+    () => computeSubscriptionAnalytics(subscriptions),
+    [subscriptions]
+  );
 
-    subscriptions.forEach((subscription) => {
-      const monthlyCost = subscription.cost / subscription.months;
-      monthly[subscription.currency] = (monthly[subscription.currency] ?? 0) + monthlyCost;
-    });
-
-    const yearly = Object.fromEntries(
-      Object.entries(monthly).map(([currency, value]) => [currency, value * 12])
-    );
-
-    return { monthly, yearly };
-  }, [subscriptions]);
+  const activeCurrencies = analytics.currencies.filter(
+    (currency) => (analytics.monthlyTotals[currency] ?? 0) > 0
+  );
 
   const handleFormChange = <Field extends keyof FormState>(field: Field, value: FormState[Field]) => {
     setForm((prev) => ({ ...prev, [field]: value }));
@@ -92,6 +73,17 @@ export default function CalculatorPage() {
       return;
     }
 
+    if (!form.nextPaymentDate) {
+      setError("Укажите дату следующего платежа.");
+      return;
+    }
+
+    const nextPayment = new Date(form.nextPaymentDate);
+    if (!isValidDate(nextPayment)) {
+      setError("Укажите корректную дату следующего платежа.");
+      return;
+    }
+
     let months = frequency.months;
 
     if (frequency.value === "custom") {
@@ -111,23 +103,22 @@ export default function CalculatorPage() {
       months,
       frequencyLabel:
         frequency.value === "custom" ? `Каждые ${months} мес.` : frequency.label,
+      nextPaymentDate: getDateInputValue(nextPayment),
     };
 
-    setSubscriptions((prev) => [...prev, newSubscription]);
-    setForm((prev) => ({
-      ...initialForm,
-      currency: prev.currency,
-    }));
+    addSubscription(newSubscription);
+    setForm((prev) => {
+      const nextState = createInitialFormState();
+      return {
+        ...nextState,
+        currency: prev.currency,
+      };
+    });
   };
 
   const handleDelete = (id: number) => {
-    setSubscriptions((prev) => prev.filter((subscription) => subscription.id !== id));
+    removeSubscription(id);
   };
-
-  const formatCurrency = (value: number) =>
-    value % 1 === 0 ? value.toFixed(0) : value.toFixed(2);
-
-  const currencies = Array.from(new Set([...Object.keys(totals.monthly)]));
 
   return (
     <div className="bg-gradient-to-b from-slate-50 to-white py-10 dark:from-slate-950 dark:to-slate-900">
@@ -149,7 +140,7 @@ export default function CalculatorPage() {
             <div>
               <h2 className="text-lg font-semibold">Новая подписка</h2>
               <p className="text-sm text-slate-500 dark:text-slate-400">
-                Название, стоимость и период оплаты — этого достаточно, чтобы попасть в расчёт.
+                Название, стоимость, период и дата следующего платежа — этого достаточно, чтобы попасть в расчёт.
               </p>
             </div>
 
@@ -219,6 +210,16 @@ export default function CalculatorPage() {
               </label>
             )}
 
+            <label className="block space-y-1 text-sm font-medium">
+              <span>Следующий платёж</span>
+              <input
+                type="date"
+                value={form.nextPaymentDate}
+                onChange={(event) => handleFormChange("nextPaymentDate", event.target.value)}
+                className="w-full rounded-xl border border-slate-300/70 bg-white/90 px-3 py-2 text-sm outline-none ring-primary/20 transition focus:ring-2 dark:border-slate-700/70 dark:bg-slate-900/80"
+              />
+            </label>
+
             {error && <p className="text-sm text-red-500">{error}</p>}
 
             <button
@@ -239,12 +240,12 @@ export default function CalculatorPage() {
             </header>
 
             <div className="grid gap-4 sm:grid-cols-2">
-              {currencies.length === 0 ? (
+              {activeCurrencies.length === 0 ? (
                 <div className="rounded-2xl border border-dashed border-slate-300/70 p-6 text-center text-sm text-slate-500 dark:border-slate-700/70 dark:text-slate-400">
                   Добавьте первую подписку, чтобы увидеть суммы.
                 </div>
               ) : (
-                currencies.map((currency) => (
+                activeCurrencies.map((currency) => (
                   <div
                     key={currency}
                     className="rounded-2xl border border-slate-200/70 bg-white/70 p-5 shadow-sm dark:border-slate-700/70 dark:bg-slate-900/50"
@@ -255,13 +256,13 @@ export default function CalculatorPage() {
                       <div className="flex items-center justify-between text-slate-600 dark:text-slate-300">
                         <span>В месяц</span>
                         <span className="font-semibold">
-                          {formatCurrency(totals.monthly[currency])} {currency}
+                          {formatMoney(analytics.monthlyTotals[currency] ?? 0)} {currency}
                         </span>
                       </div>
                       <div className="flex items-center justify-between text-slate-600 dark:text-slate-300">
                         <span>В год</span>
                         <span className="font-semibold">
-                          {formatCurrency(totals.yearly[currency])} {currency}
+                          {formatMoney(analytics.yearlyTotals[currency] ?? 0)} {currency}
                         </span>
                       </div>
                     </div>
@@ -283,6 +284,7 @@ export default function CalculatorPage() {
                   subscriptions.map((subscription) => {
                     const monthlyCost = subscription.cost / subscription.months;
                     const yearlyCost = monthlyCost * 12;
+                    const nextPayment = analytics.nextPaymentDetails[subscription.id];
 
                     return (
                       <div
@@ -294,16 +296,22 @@ export default function CalculatorPage() {
                             {subscription.name}
                           </p>
                           <p className="text-xs text-slate-500 dark:text-slate-400">
-                            {formatCurrency(subscription.cost)} {subscription.currency} ·{" "}
+                            {formatMoney(subscription.cost)} {subscription.currency} ·{" "}
                             {subscription.frequencyLabel}
+                          </p>
+                          <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
+                            Следующий платёж:{" "}
+                            {nextPayment
+                              ? `${capitalizeFirstLetter(dayMonthFormatter.format(nextPayment.date))} · ${formatDaysLeft(nextPayment.daysLeft)}`
+                              : "не указан"}
                           </p>
                         </div>
                         <div className="flex flex-col items-start gap-1 text-sm text-slate-600 sm:flex-row sm:items-center sm:gap-4 dark:text-slate-300">
                           <span>
-                            {formatCurrency(monthlyCost)} {subscription.currency} / мес
+                            {formatMoney(monthlyCost)} {subscription.currency} / мес
                           </span>
                           <span>
-                            {formatCurrency(yearlyCost)} {subscription.currency} / год
+                            {formatMoney(yearlyCost)} {subscription.currency} / год
                           </span>
                         </div>
                         <button
@@ -318,6 +326,26 @@ export default function CalculatorPage() {
                     );
                   })
                 )}
+              </div>
+            </div>
+
+            <div className="rounded-2xl border border-slate-200/70 bg-slate-50/80 p-5 text-sm shadow-sm dark:border-slate-700/70 dark:bg-slate-900/50 dark:text-slate-300">
+              <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                <div>
+                  <p className="text-base font-semibold text-slate-700 dark:text-slate-100">
+                    Нужна детальная аналитика?
+                  </p>
+                  <p className="mt-1 text-sm text-slate-600 dark:text-slate-400">
+                    Прогнозы, распределение по периодам, календари и лидеры расходов — на отдельной странице.
+                  </p>
+                </div>
+                <Link
+                  href="/analytics"
+                  className="inline-flex items-center justify-center gap-2 rounded-xl bg-primary px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-primary/90"
+                >
+                  <LineChart className="h-4 w-4" aria-hidden />
+                  Открыть аналитику
+                </Link>
               </div>
             </div>
           </section>

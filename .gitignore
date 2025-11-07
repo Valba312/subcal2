@@ -1,10 +1,15 @@
 node_modules
-<<<<<<< Updated upstream
-=======
 .next
-.env.local
-.env.local
-<<<<<<< Updated upstream
->>>>>>> Stashed changes
-=======
->>>>>>> Stashed changes
+.env
+.env.*
+!.env.example
+dist
+out
+coverage
+*.log
+.DS_Store
+*.sqlite
+prisma/dev.db
+.vscode
+.idea
+*.tsbuildinfo
