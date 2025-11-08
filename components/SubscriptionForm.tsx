@@ -3,7 +3,7 @@
 import { useState } from "react";
 
 import { aiCategorize } from "../lib/categorize";
-import type { Category, Subscription } from "../types/subscription";
+import type { Category, DetailedSubscription } from "../types/subscription";
 
 const CATEGORY_OPTIONS: Category[] = [
   "Entertainment",
@@ -26,7 +26,7 @@ type SubscriptionFormValues = {
 };
 
 type SubscriptionFormProps = {
-  defaultValues?: Partial<Subscription>;
+  defaultValues?: Partial<DetailedSubscription>;
   onSubmit?: (values: SubscriptionFormValues) => void | Promise<void>;
 };
 
