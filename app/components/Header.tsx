@@ -1,33 +1,62 @@
+"use client";
+
 import Link from "next/link";
+import { usePathname } from "next/navigation";
+import { Plus } from "lucide-react";
+
+import { Button } from "../../components/ui/button";
+import { ThemeToggle } from "../../components/ui/theme-toggle";
+import { cn } from "../../lib/utils";
 import Logo from "./Logo";
 
+const NAV_LINKS = [
+  { href: "/", label: "Главная" },
+  { href: "/calculator", label: "Калькулятор" },
+  { href: "/analytics", label: "Аналитика" },
+  { href: "/agent", label: "AI агент" },
+];
+
 export default function Header() {
+  const pathname = usePathname();
+
   return (
-    <header className="sticky top-0 z-40 border-b border-slate-200/60 bg-white/70 backdrop-blur dark:border-slate-800 dark:bg-slate-900/40">
+    <header className="sticky top-0 z-40 border-b border-white/10 bg-white/70 backdrop-blur supports-[backdrop-filter]:bg-white/70 dark:border-white/5 dark:bg-slate-950/60">
       <div className="container flex items-center gap-6 py-4">
-        <Link href="/" aria-label="SubKeeper — главная">
+        <Link href="/" aria-label="SubKeeper — главная" className="flex items-center gap-2 text-lg font-semibold">
           <Logo withText />
         </Link>
-        <nav className="ml-auto flex items-center gap-4 text-sm font-medium">
-          <Link
-            href="/agent"
-            className="rounded-lg border border-slate-200 px-4 py-2 text-slate-600 transition hover:border-primary hover:text-primary dark:border-slate-700 dark:text-slate-200"
-          >
-            AI агент
-          </Link>
-          <Link
-            href="/analytics"
-            className="rounded-lg border border-primary/50 bg-white px-4 py-2 text-primary transition hover:border-primary hover:text-primary/90 dark:bg-slate-900 dark:text-primary-200"
-          >
-            Аналитика
-          </Link>
-          <Link
-            href="/calculator"
-            className="rounded-lg bg-primary px-4 py-2 text-white transition hover:bg-primary/90"
-          >
-            Калькулятор
-          </Link>
+        <nav className="flex flex-1 items-center gap-2 overflow-x-auto text-sm font-medium">
+          {NAV_LINKS.map((link) => (
+            <Link
+              key={link.href}
+              href={link.href}
+              aria-current={pathname === link.href ? "page" : undefined}
+              className={cn(
+                "rounded-full px-4 py-2 text-sm transition",
+                pathname === link.href
+                  ? "bg-gradient-to-r from-primary/20 to-purple-500/20 text-primary dark:text-white"
+                  : "text-slate-800 hover:text-primary dark:text-slate-200 dark:hover:text-white"
+              )}
+            >
+              {link.label}
+            </Link>
+          ))}
         </nav>
+        <div className="ml-auto hidden items-center gap-2 md:flex">
+          <ThemeToggle />
+          <Button asChild variant="default" size="lg" className="hidden md:inline-flex">
+            <Link href="/calculator#form" className="flex items-center gap-2">
+              <Plus className="h-4 w-4" aria-hidden />
+              Добавить подписку
+            </Link>
+          </Button>
+        </div>
+        <div className="flex items-center gap-2 md:hidden">
+          <Button asChild size="sm" variant="outline" className="text-xs">
+            <Link href="/calculator#form">Добавить</Link>
+          </Button>
+          <ThemeToggle />
+        </div>
       </div>
     </header>
   );

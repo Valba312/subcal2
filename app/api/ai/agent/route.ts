@@ -199,12 +199,14 @@ export async function POST(request: Request): Promise<NextResponse<AgentResponse
 
   const estimatedMonthlyBefore = validSubscriptions.reduce((total, item) => total + (item.perMonth || 0), 0);
 
+  const fallbackResponse = buildMockAgentResponse(validSubscriptions);
+
   try {
     const raw = await callLLM({
       system: SYSTEM_PROMPT,
       prompt: buildPrompt(validSubscriptions),
       json: true,
-      mock: buildMockAgentResponse(validSubscriptions),
+      mock: fallbackResponse,
     });
 
     let parsed: Partial<AgentResponse>;
@@ -215,16 +217,22 @@ export async function POST(request: Request): Promise<NextResponse<AgentResponse
       return NextResponse.json({ error: "Failed to parse LLM response" }, { status: 500 });
     }
 
-    const conflicts = Array.isArray(parsed.conflicts)
+    let conflicts = Array.isArray(parsed.conflicts)
       ? parsed.conflicts.map((conflict) => normalizeConflict(conflict)).filter((item): item is Conflict => !!item)
       : [];
 
-    const advice = Array.isArray(parsed.advice)
+    let advice = Array.isArray(parsed.advice)
       ? parsed.advice.map((entry) => normalizeAdvice(entry)).filter((item): item is Advice => !!item)
       : [];
 
+    if (conflicts.length === 0 && advice.length === 0) {
+      console.warn("agent: empty LLM result, using heuristic fallback");
+      conflicts = fallbackResponse.conflicts;
+      advice = fallbackResponse.advice;
+    }
+
     const monthlyBefore = isPositiveNumber(parsed.monthlyBefore) ? parsed.monthlyBefore : estimatedMonthlyBefore;
-    const monthlyAfter = isPositiveNumber(parsed.monthlyAfter) ? parsed.monthlyAfter : Math.max(monthlyBefore - 1, 0);
+    const monthlyAfter = isPositiveNumber(parsed.monthlyAfter) ? parsed.monthlyAfter : fallbackResponse.monthlyAfter;
     const savingPerMonth = isPositiveNumber(parsed.savingPerMonth)
       ? parsed.savingPerMonth
       : Math.max(monthlyBefore - monthlyAfter, 0);

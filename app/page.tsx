@@ -1,25 +1,35 @@
 import Link from "next/link";
-import { CheckCircle2, LineChart, Lock, Sparkles, Timer, Wallet } from "lucide-react";
+import { CheckCircle2, LineChart, Lock, Sparkles, Target, Timer, Wallet } from "lucide-react";
 
 const features = [
   {
     title: "Полная видимость расходов",
-    description: "Ведите ежемесячные и годовые суммы по каждой подписке, чтобы держать бюджет под контролем.",
+    description: "Единый экран с ежемесячными и годовыми суммами, конвертацией валют и прогнозом на год.",
     icon: Wallet,
   },
   {
     title: "Умные напоминания",
-    description: "Получайте уведомления до списания, чтобы отменять ненужные подписки вовремя.",
+    description: "SubKeeper заранее подскажет, когда подходит списание, чтобы вы успели отменить или продлить оплату.",
     icon: Timer,
   },
   {
-    title: "Аналитика для решений",
-    description: "Графики и категории помогут увидеть, где можно сократить траты.",
+    title: "Аналитика и тренды",
+    description: "Линейные графики, круговые диаграммы и фильтры периодов показывают, куда уходит бюджет.",
     icon: LineChart,
   },
   {
+    title: "AI-агент",
+    description: "Ищет пересечения (Netflix vs Иви), предлагает отключить или заменить, считает экономию.",
+    icon: Sparkles,
+  },
+  {
+    title: "Совместное использование",
+    description: "Поддержка нескольких профилей и экспорт отчётов для команды или семьи.",
+    icon: Target,
+  },
+  {
     title: "Конфиденциальность",
-    description: "Данные хранятся локально — ничего не отправляем на сервер без вашего ведома.",
+    description: "Данные остаются локально, мы не отправляем их на сервер без явного согласия.",
     icon: Lock,
   },
 ];
@@ -38,6 +48,7 @@ export default function Home() {
         <div className="container flex max-w-6xl flex-col gap-16">
           <Hero />
           <Features />
+          <ProductModules />
           <HowItWorks />
           <CtaSection />
         </div>
@@ -48,10 +59,7 @@ export default function Home() {
 
 function BackgroundAccent() {
   return (
-    <div
-      aria-hidden
-      className="pointer-events-none absolute inset-0"
-    >
+    <div aria-hidden className="pointer-events-none absolute inset-0">
       <div className="absolute inset-0 bg-gradient-to-b from-primary/10 via-transparent to-accent/10 opacity-70 dark:opacity-60" />
       <div className="absolute inset-0 bg-[radial-gradient(70rem_40rem_at_50%_-10%,rgba(124,58,237,0.25),transparent_70%)]" />
       <div
@@ -63,10 +71,7 @@ function BackgroundAccent() {
       />
       <div
         className="absolute -bottom-40 right-1/3 h-[30rem] w-[30rem] rounded-full opacity-70 blur-3xl md:opacity-80"
-        style={{
-          background:
-            "radial-gradient(circle at 30% 30%, rgba(14,165,233,0.35), transparent 60%)",
-        }}
+        style={{ background: "radial-gradient(circle at 30% 30%, rgba(14,165,233,0.35), transparent 60%)" }}
       />
     </div>
   );
@@ -80,7 +85,7 @@ function Hero() {
           <Sparkles className="h-4 w-4" aria-hidden />
           Управляйте подписками без хаоса
         </span>
-        <h1 className="text-4xl font-extrabold leading-tight tracking-tight md:text-6xl">
+        <h1 className="text-4xl font-extrabold leading-tight tracking-tight text-slate-900 md:text-6xl dark:text-white">
           SubKeeper — умный помощник для подписок
         </h1>
         <p className="text-lg text-slate-600 dark:text-slate-300">
@@ -149,37 +154,79 @@ function Illustration() {
 
 function Features() {
   return (
-    <div className="grid gap-6 md:grid-cols-2">
+    <section className="grid gap-6 md:grid-cols-2">
       {features.map((feature) => (
-        <div
-          key={feature.title}
-          className="group relative overflow-hidden rounded-3xl border border-slate-200/70 bg-white/70 p-6 shadow-sm backdrop-blur transition hover:-translate-y-1 hover:shadow-xl dark:border-slate-700/70 dark:bg-slate-900/60"
-        >
-          <div
-            className="pointer-events-none absolute inset-0 opacity-0 transition group-hover:opacity-100"
-            style={{
-              background:
-                "radial-gradient(24rem 12rem at 30% -10%, rgba(124,58,237,0.2), transparent 70%)",
-            }}
-          />
-          <div className="relative z-10 space-y-4">
-            <feature.icon className="h-10 w-10 text-primary" aria-hidden />
-            <div className="space-y-2">
-              <h3 className="text-xl font-semibold">{feature.title}</h3>
-              <p className="text-sm leading-6 text-slate-600 dark:text-slate-300">{feature.description}</p>
+        <div key={feature.title} className="transition-transform duration-300 hover:-translate-y-1">
+          <div className="group relative overflow-hidden rounded-3xl border border-slate-200/70 bg-white/70 p-6 shadow-sm backdrop-blur dark:border-slate-700/70 dark:bg-slate-900/60">
+            <div className="pointer-events-none absolute inset-0 opacity-0 transition group-hover:opacity-100" style={{ background: "radial-gradient(24rem 12rem at 30% -10%, rgba(124,58,237,0.2), transparent 70%)" }} />
+            <div className="relative z-10 space-y-4">
+              <feature.icon className="h-10 w-10 text-primary" aria-hidden />
+              <div className="space-y-2">
+                <h3 className="text-xl font-semibold text-slate-900 dark:text-white">{feature.title}</h3>
+                <p className="text-sm leading-6 text-slate-600 dark:text-slate-300">{feature.description}</p>
+              </div>
             </div>
           </div>
         </div>
       ))}
-    </div>
+    </section>
+  );
+}
+
+function ProductModules() {
+  const modules = [
+    {
+      label: "Калькулятор",
+      description: "Добавляйте подписки, пересчитывайте стоимость в месяц и год, фиксируйте валюты.",
+      href: "/calculator",
+      accent: "Расчёты",
+    },
+    {
+      label: "Аналитика",
+      description: "Линейные графики, круговые диаграммы и календарь оплат для планирования бюджета.",
+      href: "/analytics",
+      accent: "Отчёты",
+    },
+    {
+      label: "AI-агент",
+      description: "Ищет конфликты, предлагает отключить дубли и показывает, сколько сэкономите.",
+      href: "/agent",
+      accent: "Экономия",
+    },
+  ];
+
+  return (
+    <section className="grid gap-6 rounded-3xl border border-white/40 bg-white/70 p-8 shadow-lg backdrop-blur dark:border-slate-800 dark:bg-slate-900/70">
+      <div className="space-y-2 text-center md:text-left">
+        <h2 className="text-3xl font-bold text-slate-900 dark:text-white">Модули SubKeeper</h2>
+        <p className="text-slate-600 dark:text-slate-300">Любой сценарий решается через калькулятор, аналитику или AI-агента.</p>
+      </div>
+      <div className="grid gap-4 md:grid-cols-3">
+        {modules.map((module) => (
+          <Link
+            key={module.label}
+            href={module.href}
+            className="flex flex-col gap-3 rounded-3xl border border-slate-200/70 bg-white/80 px-5 py-6 text-left shadow-sm transition hover:-translate-y-1 hover:shadow-xl dark:border-slate-700/70 dark:bg-slate-900/60"
+          >
+            <span className="text-xs uppercase tracking-[0.15em] text-primary/80">{module.accent}</span>
+            <p className="text-xl font-semibold text-slate-900 dark:text-white">{module.label}</p>
+            <p className="text-sm text-slate-600 dark:text-slate-300">{module.description}</p>
+            <span className="text-sm font-semibold text-primary">Перейти →</span>
+          </Link>
+        ))}
+      </div>
+    </section>
   );
 }
 
 function HowItWorks() {
   return (
-    <section id="how-it-works" className="grid gap-8 rounded-3xl border border-slate-200/70 bg-white/80 p-8 shadow-sm backdrop-blur dark:border-slate-700/70 dark:bg-slate-900/60">
+    <section
+      id="how-it-works"
+      className="grid gap-8 rounded-3xl border border-slate-200/70 bg-white/80 p-8 shadow-sm backdrop-blur dark:border-slate-700/70 dark:bg-slate-900/60"
+    >
       <div className="space-y-2 text-center md:text-left">
-        <h2 className="text-3xl font-bold tracking-tight">3 шага к прозрачным подпискам</h2>
+        <h2 className="text-3xl font-bold tracking-tight text-slate-900 dark:text-white">3 шага к прозрачным подпискам</h2>
         <p className="text-slate-600 dark:text-slate-300">
           Всё работает прямо в браузере — достаточно открыть SubKeeper и внести активные подписки.
         </p>
@@ -188,7 +235,8 @@ function HowItWorks() {
         {[
           {
             title: "1. Добавьте сервисы",
-            description: "Укажите название, стоимость и периодичность оплаты. Поддерживаются месячные, годовые и пользовательские периоды.",
+            description:
+              "Укажите название, стоимость и периодичность оплаты. Поддерживаются месячные, годовые и пользовательские периоды.",
           },
           {
             title: "2. Настройте напоминания",
@@ -199,9 +247,9 @@ function HowItWorks() {
             description: "Смотрите, сколько тратите на каждый сервис и в сумме, чтобы принимать решения и экономить.",
           },
         ].map((step) => (
-          <div key={step.title} className="space-y-2 rounded-2xl border border-slate-200/70 bg-white/70 p-5 shadow-sm dark:border-slate-700/70 dark:bg-slate-900/50">
-            <h3 className="text-lg font-semibold">{step.title}</h3>
-            <p className="text-sm leading-6 text-slate-600 dark:text-slate-300">{step.description}</p>
+          <div key={step.title} className="rounded-3xl border border-slate-200/70 bg-white p-6 shadow-sm dark:border-slate-700/70 dark:bg-slate-900">
+            <p className="text-sm font-semibold text-primary">{step.title}</p>
+            <p className="mt-2 text-sm text-slate-600 dark:text-slate-300">{step.description}</p>
           </div>
         ))}
       </div>
@@ -211,19 +259,31 @@ function HowItWorks() {
 
 function CtaSection() {
   return (
-    <section className="rounded-3xl border border-primary/20 bg-gradient-to-r from-primary/10 to-accent/10 p-10 text-center shadow-sm dark:from-primary/20 dark:to-accent/20">
-      <div className="mx-auto flex max-w-3xl flex-col items-center gap-6">
-        <h2 className="text-3xl font-bold tracking-tight md:text-4xl">Начните контролировать подписки сегодня</h2>
-        <p className="text-base text-slate-600 dark:text-slate-200">
-          SubKeeper уже помогает пользователям находить лояльные тарифы и избавляться от лишних расходов. Присоединяйтесь и
-          увидите, сколько можно сэкономить.
-        </p>
-        <Link
-          href="/calculator"
-          className="inline-flex items-center justify-center rounded-xl bg-primary px-8 py-3 text-base font-semibold text-white shadow-md transition hover:-translate-y-0.5 hover:shadow-lg hover:bg-primary/90"
-        >
-          Перейти к калькулятору
-        </Link>
+    <section className="rounded-3xl border border-slate-200/70 bg-white/90 p-10 shadow-lg dark:border-slate-700/70 dark:bg-slate-900">
+      <div className="grid gap-6 md:grid-cols-[1.1fr_0.9fr]">
+        <div className="space-y-4">
+          <h2 className="text-3xl font-bold text-slate-900 dark:text-white">Попробуйте SubKeeper сегодня</h2>
+          <p className="text-slate-600 dark:text-slate-300">
+            Добавьте свои подписки, настройте напоминания и подключите AI‑агента для поиска дубликатов. Всё бесплатно и максимально просто.
+          </p>
+          <div className="flex flex-col gap-3 sm:flex-row">
+            <Link href="/calculator" className="inline-flex items-center justify-center rounded-xl bg-primary px-6 py-3 text-base font-semibold text-white transition hover:bg-primary/90">
+              Начать
+            </Link>
+            <Link href="/agent" className="inline-flex items-center justify-center rounded-xl border border-slate-300 px-6 py-3 text-base font-semibold text-slate-700 transition hover:border-primary hover:text-primary dark:border-slate-700 dark:text-slate-300">
+              AI агент
+            </Link>
+          </div>
+        </div>
+        <div className="rounded-3xl border border-slate-200/70 bg-slate-50/60 p-6 dark:border-slate-700/70 dark:bg-slate-800/60">
+          <h3 className="text-lg font-semibold text-slate-900 dark:text-white">Возможности:</h3>
+          <ul className="mt-4 space-y-2 text-sm text-slate-600 dark:text-slate-300">
+            <li>• Синхронизированный калькулятор и аналитика</li>
+            <li>• AI‑агент для поиска конфликтов</li>
+            <li>• Экспорт данных и демо-режим</li>
+            <li>• Локальное хранение данных</li>
+          </ul>
+        </div>
       </div>
     </section>
   );

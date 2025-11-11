@@ -38,11 +38,6 @@ export interface Advice {
   savingPerMonth?: number;
 }
 
-export type AgentChatMessage = {
-  role: "user" | "assistant";
-  content: string;
-};
-
 /**
  * Legacy detailed subscription shape used by the rest of the app (forms, analytics, etc.).
  */

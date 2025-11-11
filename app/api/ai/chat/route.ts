@@ -1,7 +1,8 @@
+import { randomUUID } from "crypto";
 import { NextResponse } from "next/server";
 
 import { callLLM } from "../../../../lib/ai";
-import type { AgentChatMessage } from "../../../../types/subscription";
+import type { ChatMessage } from "../../../../types/chat";
 
 const SYSTEM_PROMPT = `Ты — опытный финансовый консультант по подпискам.
 - Всегда опирайся на ВЕСЬ диалог и отвечай на текущий запрос без повторяющихся шаблонов.
@@ -10,7 +11,9 @@ const SYSTEM_PROMPT = `Ты — опытный финансовый консул
 - Формат ответа: короткое введение + нумерованные советы с экономией в ₽/мес или %, + финальный call-to-action.
 - Если информации ноль, предложи типовые сценарии экономии и попроси данные максимально конкретно.`;
 
-const MAX_MESSAGES = 12;
+const SYSTEM_GUARD = "Отвечай только на основе того, что написал пользователь. Язык ответа = язык последнего user-сообщения.";
+
+const MAX_MESSAGES = 20;
 
 const SERVICE_LIBRARY = [
   { name: "Netflix", type: "Видео", price: 599, keywords: ["netflix"] },
@@ -19,7 +22,7 @@ const SERVICE_LIBRARY = [
   { name: "Okko", type: "Видео", price: 549, keywords: ["okko"] },
   { name: "Амедиатека", type: "Видео", price: 599, keywords: ["amedi", "amediateka"] },
   { name: "Megogo", type: "Видео", price: 399, keywords: ["megogo"] },
-  { name: "T-Премиум", type: "Видео", price: 999, keywords: ["t\u002dпремиум", "t премиум", "t-premium"] },
+  { name: "T-Премиум", type: "Видео", price: 999, keywords: ["t-премиум", "t премиум", "t-premium"] },
   { name: "Wink", type: "Видео", price: 399, keywords: ["wink"] },
   { name: "Spotify", type: "Музыка", price: 269, keywords: ["spotify"] },
   { name: "Яндекс Музыка", type: "Музыка", price: 239, keywords: ["яндекс", "yandex music", "yandex музыка"] },
@@ -38,7 +41,7 @@ type ParsedService = {
   mentions: number;
 };
 
-const extractServicesFromHistory = (messages: AgentChatMessage[]): ParsedService[] => {
+const extractServicesFromHistory = (messages: ChatMessage[]): ParsedService[] => {
   const found = new Map<string, ParsedService>();
 
   messages
@@ -104,7 +107,7 @@ const DEFAULT_STRATEGIES = [
   "Годовые планы Adobe, Spotify, YouTube Premium дают 15–20% скидки. Оплати с кэшбэком банковской карты — ещё −5%.",
 ];
 
-const buildMockReply = (messages: AgentChatMessage[]): string => {
+const buildMockReply = (messages: ChatMessage[]): string => {
   const lastUser = [...messages].reverse().find((message) => message.role === "user");
   const services = extractServicesFromHistory(messages);
   const suggestions = buildOptimisationSummary(services);
@@ -136,37 +139,81 @@ const buildMockReply = (messages: AgentChatMessage[]): string => {
   return [intro, ...fallbackList, "Перечисли свои сервисы и цены — адаптирую рекомендации под тебя."].join("\n");
 };
 
+const buildContextSummary = (context: unknown): string => {
+  if (context === null || typeof context === "undefined") {
+    return "";
+  }
+  if (typeof context === "string") {
+    return context;
+  }
+  try {
+    return JSON.stringify(context, null, 2);
+  } catch (error) {
+    console.warn("chat-agent: failed to stringify context", error);
+    return String(context);
+  }
+};
+
+const buildSystemPrompt = (context?: unknown): string => {
+  const blocks = [SYSTEM_PROMPT, SYSTEM_GUARD];
+  const contextSummary = buildContextSummary(context);
+  if (contextSummary) {
+    blocks.push(`Контекст пользователя:\n${contextSummary}`);
+  }
+  return blocks.join("\n\n");
+};
+
 type ChatRequest = {
-  messages: AgentChatMessage[];
+  messages: unknown[];
+  context?: unknown;
+  conversationId?: string;
 };
 
 type ChatResponse = {
-  reply: string;
+  message: ChatMessage;
+  conversationId: string;
 };
 
-const isChatMessage = (value: unknown): value is AgentChatMessage => {
+const isChatMessage = (value: unknown): value is ChatMessage => {
   if (!value || typeof value !== "object") {
     return false;
   }
-  const { role, content } = value as Record<string, unknown>;
-  return (role === "user" || role === "assistant") && typeof content === "string" && content.trim().length > 0;
+  const { id, role, content, createdAt } = value as Record<string, unknown>;
+  const hasValidRole = role === "user" || role === "assistant" || role === "system";
+  return (
+    typeof id === "string" &&
+    hasValidRole &&
+    typeof content === "string" &&
+    content.trim().length > 0 &&
+    typeof createdAt === "number"
+  );
 };
 
-const sanitizeMessages = (messages: AgentChatMessage[]): AgentChatMessage[] => {
-  const trimmed = messages
+const normalizeMessages = (messages: unknown[]): ChatMessage[] =>
+  messages
+    .filter((message): message is ChatMessage => isChatMessage(message))
     .slice(-MAX_MESSAGES)
     .map((message) => ({ ...message, content: message.content.trim() }))
     .filter((message) => message.content.length > 0);
 
-  return trimmed;
-};
-
-const buildPrompt = (messages: AgentChatMessage[]): string => {
+const buildPrompt = (messages: ChatMessage[]): string => {
   const history = messages
-    .map((message) => `${message.role === "assistant" ? "Агент" : "Пользователь"}: ${message.content}`)
+    .map((message) => {
+      const author =
+        message.role === "assistant" ? "Агент" : message.role === "system" ? "Система" : "Пользователь";
+      return `${author}: ${message.content}`;
+    })
     .join("\n");
 
   return `${history}\n\nОтветь как эксперт по подпискам: дай конкретные советы, цифры экономии, варианты альтернатив. Если нет данных — попроси уточнить.`;
+};
+
+const sanitizeAssistantText = (text: string): string => {
+  return text
+    .replace(/\r\n/g, "\n")
+    .replace(/[*_`#~]/g, "")
+    .replace(/\n{3,}/g, "\n\n")
+    .trim();
 };
 
 export async function POST(request: Request): Promise<NextResponse<ChatResponse | { error: string }>> {
@@ -179,28 +226,35 @@ export async function POST(request: Request): Promise<NextResponse<ChatResponse 
     return NextResponse.json({ error: "Invalid JSON body" }, { status: 400 });
   }
 
-  if (!Array.isArray(body.messages)) {
-    return NextResponse.json({ error: "'messages' must be an array" }, { status: 400 });
+  if (!Array.isArray(body.messages) || body.messages.length === 0) {
+    return NextResponse.json({ error: "'messages' must be a non-empty array" }, { status: 400 });
   }
 
-  const sanitized = sanitizeMessages(body.messages).filter((message) => isChatMessage(message));
+  const sanitized = normalizeMessages(body.messages);
 
   if (sanitized.length === 0 || sanitized[sanitized.length - 1].role !== "user") {
     return NextResponse.json({ error: "Provide at least one user message" }, { status: 400 });
   }
 
+  const conversationId = body.conversationId ?? randomUUID();
+
   try {
+    console.debug("chat-agent: calling LLM", {
+      totalMessages: sanitized.length,
+      lastRole: sanitized.at(-1)?.role,
+    });
+
     const raw = await callLLM({
-      system: SYSTEM_PROMPT,
+      system: buildSystemPrompt(body.context),
       prompt: buildPrompt(sanitized),
       mock: { reply: buildMockReply(sanitized) },
     });
 
-    let reply = raw.trim();
+    let reply = sanitizeAssistantText(raw.trim());
     try {
       const parsed = JSON.parse(raw) as { reply?: string };
       if (parsed.reply && typeof parsed.reply === "string") {
-        reply = parsed.reply;
+        reply = sanitizeAssistantText(parsed.reply);
       }
     } catch (error) {
       console.debug("chat-agent: response is not JSON, using raw text");
@@ -210,7 +264,21 @@ export async function POST(request: Request): Promise<NextResponse<ChatResponse 
       reply = "Я не получил ответа от модели. Попробуй сформулировать вопрос иначе.";
     }
 
-    return NextResponse.json({ reply });
+    const message: ChatMessage = {
+      id: randomUUID(),
+      role: "assistant",
+      content: sanitizeAssistantText(reply),
+      createdAt: Date.now(),
+    };
+
+    return NextResponse.json(
+      { message, conversationId },
+      {
+        headers: {
+          "x-conversation-id": conversationId,
+        },
+      }
+    );
   } catch (error) {
     console.error("chat-agent: LLM call failed", error);
     if (error instanceof Error) {
