@@ -62,7 +62,7 @@ const extractServicesFromHistory = (messages: ChatMessage[]): ParsedService[] =>
       });
     });
 
-  return [...found.values()];
+  return Array.from(found.values());
 };
 
 const buildOptimisationSummary = (services: ParsedService[]): string[] => {
