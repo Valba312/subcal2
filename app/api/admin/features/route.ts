@@ -3,6 +3,9 @@ import { NextResponse } from "next/server";
 import { requireAdmin } from "../../../../lib/server/admin";
 import { updateFeatureFlag } from "../../../../lib/server/admin-data";
 
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+
 export async function PATCH(request: Request) {
   const admin = await requireAdmin();
   if (!admin) {
@@ -18,5 +21,12 @@ export async function PATCH(request: Request) {
   }
 
   const features = await updateFeatureFlag(key, enabled);
-  return NextResponse.json({ features });
+  return NextResponse.json(
+    { features },
+    {
+      headers: {
+        "Cache-Control": "no-store",
+      },
+    }
+  );
 }
