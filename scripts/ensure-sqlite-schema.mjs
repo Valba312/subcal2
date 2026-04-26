@@ -1,5 +1,6 @@
 import fs from "node:fs";
 import path from "node:path";
+import { pbkdf2Sync, randomBytes, randomUUID } from "node:crypto";
 
 import Database from "better-sqlite3";
 
@@ -125,6 +126,32 @@ db.exec(`
     resolvedAt DATETIME
   );
 `);
+
+const adminEmail = process.env.ADMIN_EMAIL?.trim().toLowerCase();
+const adminPassword = process.env.ADMIN_PASSWORD;
+
+if (adminEmail && adminPassword) {
+  if (adminPassword.length < 6) {
+    throw new Error("ADMIN_PASSWORD must contain at least 6 characters");
+  }
+
+  const existingAdmin = db.prepare("SELECT id FROM User WHERE email = ?").get(adminEmail);
+
+  if (!existingAdmin) {
+    const salt = randomBytes(16).toString("hex");
+    const hash = pbkdf2Sync(adminPassword, salt, 100000, 64, "sha512").toString("hex");
+    const now = new Date().toISOString();
+
+    db.prepare(
+      `
+        INSERT INTO User (id, name, email, passwordHash, createdAt, updatedAt)
+        VALUES (?, ?, ?, ?, ?, ?)
+      `
+    ).run(randomUUID(), "Admin", adminEmail, `${salt}:${hash}`, now, now);
+
+    console.log(`Admin account is ready for ${adminEmail}`);
+  }
+}
 
 db.close();
 console.log(`SQLite schema is ready at ${databasePath}`);

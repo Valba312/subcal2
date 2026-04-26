@@ -1,7 +1,9 @@
 import { getCurrentUser, type SessionUser } from "./auth";
 
 const getAdminEmails = () =>
-  (process.env.ADMIN_EMAILS ?? "")
+  [process.env.ADMIN_EMAIL, process.env.ADMIN_EMAILS]
+    .filter(Boolean)
+    .join(",")
     .split(",")
     .map((email) => email.trim().toLowerCase())
     .filter(Boolean);
