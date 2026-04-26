@@ -43,6 +43,7 @@ module.exports = {
           foreground: "hsl(var(--destructive-foreground))",
         },
         mutedForeground: "hsl(var(--muted-foreground))",
+        "muted-foreground": "hsl(var(--muted-foreground))",
         accent: "hsl(var(--accent))",
       },
       borderRadius: {

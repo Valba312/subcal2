@@ -4,6 +4,9 @@ import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 
 import Header from "./components/Header";
+import { AuthProvider } from "../components/auth-provider";
+import { ClientErrorReporter } from "../components/client-error-reporter";
+import { PublicConfigProvider } from "../components/public-config-provider";
 import { ThemeProvider } from "../components/ui/theme-provider";
 import { Toaster } from "../components/ui/toaster";
 
@@ -20,11 +23,16 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="ru" suppressHydrationWarning>
       <body className={`${fontSans.variable} bg-background text-foreground`}>
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
-          <div className="flex min-h-dvh flex-col">
-            <Header />
-            <main className="flex-1">{children}</main>
-          </div>
-          <Toaster />
+          <AuthProvider>
+            <PublicConfigProvider>
+              <ClientErrorReporter />
+              <div className="flex min-h-dvh flex-col">
+                <Header />
+                <main className="flex-1">{children}</main>
+              </div>
+              <Toaster />
+            </PublicConfigProvider>
+          </AuthProvider>
         </ThemeProvider>
       </body>
     </html>

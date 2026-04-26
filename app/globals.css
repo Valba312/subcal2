@@ -56,6 +56,12 @@
   }
 }
 
+@layer components {
+  .form-input {
+    @apply min-h-12 w-full rounded-2xl border bg-background px-4 text-sm text-foreground outline-none transition placeholder:text-muted-foreground focus:border-primary focus:ring-2 focus:ring-primary/20;
+  }
+}
+
 .grid-light {
   background-image: radial-gradient(circle at 1px 1px, rgba(99, 91, 255, 0.12) 1px, transparent 0);
   background-size: 36px 36px;

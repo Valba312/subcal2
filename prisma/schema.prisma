@@ -1,0 +1,75 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+}
+
+model User {
+  id             String         @id @default(cuid())
+  name           String
+  email          String         @unique
+  passwordHash   String
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
+  sessions       Session[]
+  subscriptions  Subscription[]
+}
+
+model Session {
+  id         String   @id @default(cuid())
+  tokenHash  String   @unique
+  expiresAt  DateTime
+  createdAt  DateTime @default(now())
+  userId     String
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+model Subscription {
+  id               Int      @id @default(autoincrement())
+  name             String
+  cost             Float
+  currency         String
+  months           Int
+  frequencyLabel   String
+  nextPaymentDate  DateTime
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+  userId           String
+  user             User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+model FeatureFlag {
+  key          String   @id
+  label        String
+  description  String
+  enabled      Boolean  @default(true)
+  updatedAt    DateTime @default(now())
+}
+
+model AppContact {
+  id         Int      @id @default(autoincrement())
+  title      String
+  value      String
+  href       String?
+  isActive   Boolean  @default(true)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @default(now())
+}
+
+model ClientError {
+  id         Int       @id @default(autoincrement())
+  message    String
+  stack      String?
+  path       String?
+  userAgent  String?
+  userId     String?
+  severity   String    @default("critical")
+  createdAt  DateTime  @default(now())
+  resolvedAt DateTime?
+}

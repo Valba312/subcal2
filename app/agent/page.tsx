@@ -5,6 +5,8 @@ import { useMemo, useState } from "react";
 
 import AgentChat from "../../components/AgentChat";
 import AgentPanel from "../../components/AgentPanel";
+import { AuthGuard } from "../../components/auth-guard";
+import { FeatureGate } from "../../components/feature-gate";
 import { useSubscriptions } from "../../hooks/useSubscriptions";
 import type { Period, Subscription as AgentSubscription } from "../../types/subscription";
 
@@ -77,8 +79,10 @@ export default function AgentPage() {
   }, [agentSubscriptions]);
 
   return (
-    <div className="bg-gradient-to-b from-white via-slate-50 to-white py-10 dark:from-slate-950 dark:via-slate-950 dark:to-slate-900">
-      <div className="container flex max-w-6xl flex-col gap-8">
+    <AuthGuard>
+      <FeatureGate feature="agent">
+      <div className="bg-gradient-to-b from-white via-slate-50 to-white py-10 dark:from-slate-950 dark:via-slate-950 dark:to-slate-900">
+        <div className="container flex max-w-6xl flex-col gap-8">
         <div className="space-y-3">
           <p className="text-xs font-semibold uppercase tracking-[0.15em] text-slate-500">AI-агент</p>
           <h1 className="text-4xl font-bold tracking-tight text-slate-900 dark:text-white">Оптимизация подписок</h1>
@@ -124,8 +128,10 @@ export default function AgentPage() {
         <div className="rounded-[32px] border border-slate-200/80 bg-white/90 p-6 shadow-[0_40px_80px_-40px_rgba(15,23,42,0.45)] dark:border-slate-800 dark:bg-slate-900">
           {activeTab === "optimizer" ? <AgentPanel subs={agentSubscriptions} /> : <AgentChat context={chatContext} />}
         </div>
+        </div>
       </div>
-    </div>
+      </FeatureGate>
+    </AuthGuard>
   );
 }
 
