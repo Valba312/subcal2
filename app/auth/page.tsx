@@ -3,7 +3,7 @@
 import { CheckCircle2, Loader2, Lock, Mail, UserRound } from "lucide-react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useMemo, useState, type ReactNode } from "react";
+import { Suspense, useMemo, useState, type ReactNode } from "react";
 import { toast } from "sonner";
 
 import { useAuth } from "../../components/auth-provider";
@@ -37,6 +37,14 @@ const DEFAULT_LOGIN_FORM: LoginFormState = {
 const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 export default function AuthPage() {
+  return (
+    <Suspense fallback={<AuthPageSkeleton />}>
+      <AuthPageContent />
+    </Suspense>
+  );
+}
+
+function AuthPageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { isReady, user, login, register } = useAuth();
@@ -279,6 +287,14 @@ export default function AuthPage() {
           </Tabs>
         </section>
       </div>
+    </div>
+  );
+}
+
+function AuthPageSkeleton() {
+  return (
+    <div className="container flex min-h-[calc(100dvh-80px)] items-center py-10">
+      <div className="mx-auto h-[520px] w-full max-w-5xl animate-pulse rounded-3xl bg-muted" />
     </div>
   );
 }

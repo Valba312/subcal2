@@ -5,6 +5,7 @@
   "scripts": {
     "dev": "powershell -Command \"$env:PORT = if ($env:PORT) { $env:PORT } else { '3000' }; next dev -H 0.0.0.0 -p $env:PORT\"",
     "build": "next build",
+    "prisma:generate": "prisma generate",
     "start": "powershell -Command \"$env:PORT = if ($env:PORT) { $env:PORT } else { '3000' }; next start -H 0.0.0.0 -p $env:PORT\"",
     "lint": "next lint"
   },
