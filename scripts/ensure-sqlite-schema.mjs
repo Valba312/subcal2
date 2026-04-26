@@ -127,8 +127,24 @@ db.exec(`
   );
 `);
 
-const adminEmail = process.env.ADMIN_EMAIL?.trim().toLowerCase();
+function getAdminEmails() {
+  return [process.env.ADMIN_EMAIL, process.env.ADMIN_EMAILS]
+    .filter(Boolean)
+    .join(",")
+    .split(",")
+    .map((email) => email.trim().toLowerCase())
+    .filter(Boolean);
+}
+
+function hashPassword(password) {
+  const salt = randomBytes(16).toString("hex");
+  const hash = pbkdf2Sync(password, salt, 100000, 64, "sha512").toString("hex");
+  return `${salt}:${hash}`;
+}
+
+const adminEmail = getAdminEmails()[0];
 const adminPassword = process.env.ADMIN_PASSWORD;
+const shouldResetAdminPassword = process.env.ADMIN_RESET_PASSWORD === "1";
 
 if (adminEmail && adminPassword) {
   if (adminPassword.length < 6) {
@@ -136,21 +152,26 @@ if (adminEmail && adminPassword) {
   }
 
   const existingAdmin = db.prepare("SELECT id FROM User WHERE email = ?").get(adminEmail);
+  const passwordHash = hashPassword(adminPassword);
+  const now = new Date().toISOString();
 
   if (!existingAdmin) {
-    const salt = randomBytes(16).toString("hex");
-    const hash = pbkdf2Sync(adminPassword, salt, 100000, 64, "sha512").toString("hex");
-    const now = new Date().toISOString();
-
     db.prepare(
       `
         INSERT INTO User (id, name, email, passwordHash, createdAt, updatedAt)
         VALUES (?, ?, ?, ?, ?, ?)
       `
-    ).run(randomUUID(), "Admin", adminEmail, `${salt}:${hash}`, now, now);
+    ).run(randomUUID(), "Admin", adminEmail, passwordHash, now, now);
 
-    console.log(`Admin account is ready for ${adminEmail}`);
+    console.log(`Admin account was created for ${adminEmail}`);
+  } else if (shouldResetAdminPassword) {
+    db.prepare("UPDATE User SET passwordHash = ?, updatedAt = ? WHERE email = ?").run(passwordHash, now, adminEmail);
+    console.log(`Admin password was reset for ${adminEmail}`);
+  } else {
+    console.log(`Admin account already exists for ${adminEmail}`);
   }
+} else {
+  console.log("Admin bootstrap skipped: ADMIN_EMAIL/ADMIN_EMAILS and ADMIN_PASSWORD are required");
 }
 
 db.close();
