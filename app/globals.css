@@ -42,6 +42,7 @@
   html {
     font-family: var(--font-sans), system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
     scroll-behavior: smooth;
+    overflow-x: hidden;
   }
 
   body {
@@ -49,16 +50,27 @@
     font-size: 16px;
     line-height: 1.5;
     font-feature-settings: "liga" on, "calt" on;
+    overflow-x: hidden;
   }
 
   * {
     @apply border-border;
   }
+
+  h1,
+  h2,
+  h3,
+  p,
+  a,
+  button,
+  span {
+    overflow-wrap: anywhere;
+  }
 }
 
 @layer components {
   .form-input {
-    @apply min-h-12 w-full rounded-2xl border bg-background px-4 text-sm text-foreground outline-none transition placeholder:text-muted-foreground focus:border-primary focus:ring-2 focus:ring-primary/20;
+    @apply min-h-12 w-full min-w-0 rounded-2xl border bg-background px-4 text-sm text-foreground outline-none transition placeholder:text-muted-foreground focus:border-primary focus:ring-2 focus:ring-primary/20;
   }
 }
 

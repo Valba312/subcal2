@@ -81,11 +81,11 @@ export default function AgentPage() {
   return (
     <AuthGuard>
       <FeatureGate feature="agent">
-      <div className="bg-gradient-to-b from-white via-slate-50 to-white py-10 dark:from-slate-950 dark:via-slate-950 dark:to-slate-900">
-        <div className="container flex max-w-6xl flex-col gap-8">
+      <div className="bg-gradient-to-b from-white via-slate-50 to-white py-8 sm:py-10 dark:from-slate-950 dark:via-slate-950 dark:to-slate-900">
+        <div className="container flex max-w-6xl flex-col gap-6 sm:gap-8">
         <div className="space-y-3">
           <p className="text-xs font-semibold uppercase tracking-[0.15em] text-slate-500">AI-агент</p>
-          <h1 className="text-4xl font-bold tracking-tight text-slate-900 dark:text-white">Оптимизация подписок</h1>
+          <h1 className="text-3xl font-bold tracking-tight text-slate-900 sm:text-4xl dark:text-white">Оптимизация подписок</h1>
           <p className="text-sm text-slate-600 dark:text-slate-300">
             Агент находит дублирующиеся сервисы, считает экономию и общается в свободной форме, как личный консультант.
           </p>
@@ -113,7 +113,7 @@ export default function AgentPage() {
                 key={tab.key}
                 type="button"
                 onClick={() => setActiveTab(tab.key as "optimizer" | "chat")}
-                className={`rounded-2xl px-4 py-2 transition-all ${
+                className={`min-w-0 rounded-2xl px-3 py-2 text-xs transition-all sm:px-4 sm:text-sm ${
                   activeTab === tab.key
                     ? "bg-gradient-to-r from-primary to-purple-500 text-white shadow-lg shadow-primary/30"
                     : "bg-white text-slate-600 hover:text-primary dark:bg-slate-800 dark:text-white/70"
@@ -125,7 +125,7 @@ export default function AgentPage() {
           </div>
         </div>
 
-        <div className="rounded-[32px] border border-slate-200/80 bg-white/90 p-6 shadow-[0_40px_80px_-40px_rgba(15,23,42,0.45)] dark:border-slate-800 dark:bg-slate-900">
+        <div className="rounded-[32px] border border-slate-200/80 bg-white/90 p-3 shadow-[0_40px_80px_-40px_rgba(15,23,42,0.45)] sm:p-6 dark:border-slate-800 dark:bg-slate-900">
           {activeTab === "optimizer" ? <AgentPanel subs={agentSubscriptions} /> : <AgentChat context={chatContext} />}
         </div>
         </div>
@@ -139,7 +139,7 @@ function InfoCard({ label, value, children }: { label: string; value: string; ch
   return (
     <div className="rounded-2xl border border-slate-200/80 bg-white/90 p-4 text-sm shadow-sm dark:border-slate-800 dark:bg-slate-900 dark:text-slate-200">
       <p className="text-xs uppercase text-slate-400">{label}</p>
-      <p className="text-xl font-semibold text-slate-900 dark:text-white">{value}</p>
+      <p className="text-lg font-semibold text-slate-900 sm:text-xl dark:text-white">{value}</p>
       <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">{children}</p>
     </div>
   );

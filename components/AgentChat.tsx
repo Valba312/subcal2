@@ -179,7 +179,7 @@ export default function AgentChat({ context }: AgentChatProps) {
     <div className="flex h-full flex-col gap-4">
       <div
         ref={listRef}
-        className="relative h-[460px] w-full overflow-y-auto rounded-[32px] border border-slate-200/80 bg-white/95 p-6 text-slate-900 shadow-[0_30px_70px_-40px_rgba(15,23,42,0.35)] dark:border-slate-800 dark:bg-slate-900/90 dark:text-white"
+        className="relative h-[420px] w-full overflow-y-auto rounded-[24px] border border-slate-200/80 bg-white/95 p-3 text-slate-900 shadow-[0_30px_70px_-40px_rgba(15,23,42,0.35)] sm:h-[460px] sm:rounded-[32px] sm:p-6 dark:border-slate-800 dark:bg-slate-900/90 dark:text-white"
       >
         <div className="pointer-events-none absolute inset-x-6 top-0 h-16 bg-gradient-to-b from-white/70 to-transparent dark:from-slate-900/70" />
         <div className="space-y-4">
@@ -189,7 +189,7 @@ export default function AgentChat({ context }: AgentChatProps) {
               className={`flex ${message.role === "assistant" ? "justify-start" : "justify-end"} transition-all duration-300`}
             >
               <div
-                className={`max-w-[80%] rounded-2xl px-5 py-3 text-sm leading-relaxed shadow-sm transition ${
+                className={`max-w-[92%] rounded-2xl px-4 py-3 text-sm leading-relaxed shadow-sm transition sm:max-w-[80%] sm:px-5 ${
                   message.role === "assistant"
                     ? "bg-slate-100 text-slate-900 dark:bg-slate-800 dark:text-white"
                     : "bg-gradient-to-r from-primary to-purple-500 text-white"
@@ -216,7 +216,7 @@ export default function AgentChat({ context }: AgentChatProps) {
       </div>
 
       <div className="space-y-2">
-        <div className="flex items-center justify-between text-xs text-slate-500">
+        <div className="flex flex-col gap-2 text-xs text-slate-500 sm:flex-row sm:items-center sm:justify-between">
           <span>Нажми Enter, чтобы отправить. Shift+Enter — новая строка. ESC или «Отмена» — остановят ответ.</span>
           <button type="button" onClick={handleReset} className="text-primary underline-offset-2 hover:underline">
             Сбросить диалог
@@ -224,7 +224,7 @@ export default function AgentChat({ context }: AgentChatProps) {
         </div>
         <form
           onSubmit={handleSubmit}
-          className="flex flex-col gap-3 rounded-[32px] border border-slate-200/80 bg-white/90 p-5 shadow-[0_25px_45px_-35px_rgba(15,23,42,0.3)] dark:border-slate-800 dark:bg-slate-900"
+          className="flex flex-col gap-3 rounded-[24px] border border-slate-200/80 bg-white/90 p-3 shadow-[0_25px_45px_-35px_rgba(15,23,42,0.3)] sm:rounded-[32px] sm:p-5 dark:border-slate-800 dark:bg-slate-900"
         >
           <textarea
             value={input}
@@ -234,7 +234,7 @@ export default function AgentChat({ context }: AgentChatProps) {
             placeholder="Спросите агента: например, какие подписки отключить или как платить меньше"
             className="w-full resize-none rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm outline-none transition focus:border-primary focus:ring-4 focus:ring-primary/20 dark:border-slate-700 dark:bg-slate-900"
           />
-          <div className="flex items-center gap-3">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
             <button
               type="submit"
               disabled={isSending || input.trim().length === 0}

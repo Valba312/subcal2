@@ -44,8 +44,8 @@ export default function Home() {
   return (
     <div className="relative min-h-full overflow-hidden bg-gradient-to-br from-[#ebe8ff] via-white to-[#e6f7ff] dark:from-slate-900 dark:via-slate-900 dark:to-slate-950">
       <BackgroundAccent />
-      <section className="relative z-10 py-16 md:py-24">
-        <div className="container flex max-w-6xl flex-col gap-16">
+      <section className="relative z-10 py-10 md:py-24">
+        <div className="container flex max-w-6xl flex-col gap-10 md:gap-16">
           <Hero />
           <Features />
           <ProductModules />
@@ -63,14 +63,14 @@ function BackgroundAccent() {
       <div className="absolute inset-0 bg-gradient-to-b from-primary/10 via-transparent to-accent/10 opacity-70 dark:opacity-60" />
       <div className="absolute inset-0 bg-[radial-gradient(70rem_40rem_at_50%_-10%,rgba(124,58,237,0.25),transparent_70%)]" />
       <div
-        className="absolute -top-48 left-1/2 h-[46rem] w-[46rem] -translate-x-1/2 rounded-full opacity-80 blur-3xl md:opacity-90"
+        className="absolute -top-40 left-1/2 h-[28rem] w-[28rem] -translate-x-1/2 rounded-full opacity-70 blur-3xl md:h-[46rem] md:w-[46rem] md:opacity-90"
         style={{
           background:
             "conic-gradient(at 50% 50%, hsl(262 83% 58%) 0deg, hsl(189 92% 48%) 140deg, hsl(160 80% 55%) 240deg, hsl(262 83% 58%) 360deg)",
         }}
       />
       <div
-        className="absolute -bottom-40 right-1/3 h-[30rem] w-[30rem] rounded-full opacity-70 blur-3xl md:opacity-80"
+        className="absolute -bottom-32 right-0 h-[18rem] w-[18rem] rounded-full opacity-60 blur-3xl md:right-1/3 md:h-[30rem] md:w-[30rem] md:opacity-80"
         style={{ background: "radial-gradient(circle at 30% 30%, rgba(14,165,233,0.35), transparent 60%)" }}
       />
     </div>
@@ -85,7 +85,7 @@ function Hero() {
           <Sparkles className="h-4 w-4" aria-hidden />
           Управляйте подписками без хаоса
         </span>
-        <h1 className="text-4xl font-extrabold leading-tight tracking-tight text-slate-900 md:text-6xl dark:text-white">
+        <h1 className="text-3xl font-extrabold leading-tight tracking-tight text-slate-900 sm:text-4xl md:text-6xl dark:text-white">
           SubKeeper — умный помощник для подписок
         </h1>
         <p className="text-lg text-slate-600 dark:text-slate-300">
@@ -122,10 +122,10 @@ function Hero() {
 
 function Illustration() {
   return (
-    <div className="relative isolate mx-auto w-full max-w-[420px] rounded-3xl border border-slate-200 bg-white p-6 shadow-lg dark:border-slate-800 dark:bg-slate-900">
+    <div className="relative isolate mx-auto w-full max-w-[420px] rounded-3xl border border-slate-200 bg-white p-4 shadow-lg sm:p-6 dark:border-slate-800 dark:bg-slate-900">
       <div className="absolute inset-x-8 -top-6 h-12 rounded-full bg-gradient-to-r from-primary/30 to-accent/30 blur-xl" />
       <div className="relative space-y-4">
-        <div className="flex items-center justify-between rounded-2xl bg-slate-900/95 px-4 py-3 text-white shadow-inner">
+        <div className="flex flex-wrap items-center justify-between gap-2 rounded-2xl bg-slate-900/95 px-4 py-3 text-white shadow-inner">
           <span className="text-sm uppercase tracking-wide text-slate-300">Итого в месяц</span>
           <span className="text-2xl font-bold">6 490 ₽</span>
         </div>
@@ -138,7 +138,7 @@ function Illustration() {
           ].map((sub) => (
             <div
               key={sub.name}
-              className="flex items-center justify-between rounded-2xl border border-slate-200/70 bg-white/80 px-4 py-3 text-sm shadow-sm backdrop-blur dark:border-slate-700/70 dark:bg-slate-800/70"
+              className="flex flex-wrap items-center justify-between gap-2 rounded-2xl border border-slate-200/70 bg-white/80 px-4 py-3 text-sm shadow-sm backdrop-blur dark:border-slate-700/70 dark:bg-slate-800/70"
             >
               <span className="font-medium text-slate-700 dark:text-slate-200">{sub.name}</span>
               <span className="text-slate-500 dark:text-slate-400">
@@ -196,7 +196,7 @@ function ProductModules() {
   ];
 
   return (
-    <section className="grid gap-6 rounded-3xl border border-white/40 bg-white/70 p-8 shadow-lg backdrop-blur dark:border-slate-800 dark:bg-slate-900/70">
+    <section className="grid gap-6 rounded-3xl border border-white/40 bg-white/70 p-5 shadow-lg backdrop-blur sm:p-8 dark:border-slate-800 dark:bg-slate-900/70">
       <div className="space-y-2 text-center md:text-left">
         <h2 className="text-3xl font-bold text-slate-900 dark:text-white">Модули SubKeeper</h2>
         <p className="text-slate-600 dark:text-slate-300">Любой сценарий решается через калькулятор, аналитику или AI-агента.</p>
@@ -223,7 +223,7 @@ function HowItWorks() {
   return (
     <section
       id="how-it-works"
-      className="grid gap-8 rounded-3xl border border-slate-200/70 bg-white/80 p-8 shadow-sm backdrop-blur dark:border-slate-700/70 dark:bg-slate-900/60"
+      className="grid gap-8 rounded-3xl border border-slate-200/70 bg-white/80 p-5 shadow-sm backdrop-blur sm:p-8 dark:border-slate-700/70 dark:bg-slate-900/60"
     >
       <div className="space-y-2 text-center md:text-left">
         <h2 className="text-3xl font-bold tracking-tight text-slate-900 dark:text-white">3 шага к прозрачным подпискам</h2>
@@ -259,7 +259,7 @@ function HowItWorks() {
 
 function CtaSection() {
   return (
-    <section className="rounded-3xl border border-slate-200/70 bg-white/90 p-10 shadow-lg dark:border-slate-700/70 dark:bg-slate-900">
+    <section className="rounded-3xl border border-slate-200/70 bg-white/90 p-5 shadow-lg sm:p-10 dark:border-slate-700/70 dark:bg-slate-900">
       <div className="grid gap-6 md:grid-cols-[1.1fr_0.9fr]">
         <div className="space-y-4">
           <h2 className="text-3xl font-bold text-slate-900 dark:text-white">Попробуйте SubKeeper сегодня</h2>

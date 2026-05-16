@@ -67,7 +67,7 @@ export default function AnalyticsPage() {
       <FeatureGate feature="analytics">
       <div className="bg-background py-8 sm:py-10">
         <div className="container flex max-w-6xl flex-col gap-6">
-          <header className="rounded-3xl border bg-card p-6 shadow-soft sm:p-8">
+          <header className="rounded-3xl border bg-card p-5 shadow-soft sm:p-8">
             <div className="flex flex-col gap-5 md:flex-row md:items-center md:justify-between">
               <div className="max-w-2xl">
                 <p className="text-sm font-semibold text-primary">Отчеты SubKeeper</p>
@@ -114,7 +114,7 @@ export default function AnalyticsPage() {
               <ViewSelector activeView={activeView} onChange={setActiveView} />
 
               {showCharts && (
-                <section className="grid gap-6 lg:grid-cols-[1.2fr_0.8fr]">
+                <section className="grid gap-6 lg:grid-cols-[minmax(0,1.2fr)_minmax(0,0.8fr)]">
                   <Panel
                     title="Тренд расходов"
                     aside={<span className="text-xs font-semibold uppercase text-muted-foreground">6 месяцев</span>}
@@ -151,7 +151,7 @@ export default function AnalyticsPage() {
               )}
 
               {showLists && (
-                <section className="grid gap-6 lg:grid-cols-[1.2fr_0.8fr]">
+                <section className="grid gap-6 lg:grid-cols-[minmax(0,1.2fr)_minmax(0,0.8fr)]">
                   <Panel
                     title="Ближайшие платежи"
                     aside={<span className="text-xs font-semibold uppercase text-muted-foreground">30 дней</span>}
@@ -265,11 +265,11 @@ function PaymentCalendar({
   };
 
   return (
-    <section className="grid gap-6 lg:grid-cols-[1fr_360px]">
+    <section className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,360px)]">
       <Panel
         title="Календарь оплат"
         aside={
-          <div className="flex items-center gap-2">
+          <div className="flex max-w-full flex-wrap items-center gap-2">
             <button
               type="button"
               onClick={() => changeMonth(-1)}
@@ -297,7 +297,7 @@ function PaymentCalendar({
           </div>
         }
       >
-        <div className="mt-5 grid grid-cols-7 gap-2">
+        <div className="mt-5 grid grid-cols-7 gap-1 sm:gap-2">
           {weekDays.map((day) => (
             <div key={day} className="px-2 text-center text-xs font-semibold uppercase text-muted-foreground">
               {day}
@@ -319,7 +319,7 @@ function PaymentCalendar({
                 onClick={() => entry && onSelectDate(dateKey)}
                 disabled={!entry}
                 className={cn(
-                  "flex min-h-20 flex-col rounded-2xl border p-2 text-left transition",
+                  "flex min-h-14 flex-col rounded-xl border p-1.5 text-left transition sm:min-h-20 sm:rounded-2xl sm:p-2",
                   isCurrentMonth ? "bg-background" : "bg-muted/30 text-muted-foreground",
                   entry && "hover:border-primary hover:bg-primary/5",
                   isSelected && "border-primary bg-primary/10",
@@ -328,7 +328,7 @@ function PaymentCalendar({
               >
                 <span
                   className={cn(
-                    "flex h-6 w-6 items-center justify-center rounded-full text-xs font-semibold",
+                    "flex h-6 w-6 items-center justify-center rounded-full text-[11px] font-semibold sm:text-xs",
                     isToday && "bg-primary text-primary-foreground"
                   )}
                 >
@@ -336,8 +336,8 @@ function PaymentCalendar({
                 </span>
                 {entry && (
                   <span className="mt-auto space-y-1">
-                    <span className="block h-1.5 w-8 rounded-full bg-primary" />
-                    <span className="block truncate text-xs font-semibold text-foreground">
+                    <span className="block h-1.5 w-5 rounded-full bg-primary sm:w-8" />
+                    <span className="hidden truncate text-xs font-semibold text-foreground sm:block">
                       {formatTotals(entry.totals)}
                     </span>
                   </span>
@@ -380,7 +380,7 @@ function PaymentCalendar({
 
 function EmptyReportsState({ initialized, onReset }: { initialized: boolean; onReset: () => void }) {
   return (
-    <section className="rounded-3xl border border-dashed bg-card p-10 text-center shadow-soft">
+    <section className="rounded-3xl border border-dashed bg-card p-6 text-center shadow-soft sm:p-10">
       <p className="text-lg font-semibold text-foreground">{initialized ? "Пока нет данных" : "Загружаем данные..."}</p>
       <p className="mx-auto mt-2 max-w-xl text-sm text-muted-foreground">
         Добавьте подписки в калькулятор или загрузите демо-набор, чтобы построить отчеты и календарь оплат.
@@ -399,8 +399,8 @@ function EmptyReportsState({ initialized, onReset }: { initialized: boolean; onR
 
 function Panel({ title, aside, children }: { title: string; aside?: React.ReactNode; children: React.ReactNode }) {
   return (
-    <div className="rounded-3xl border bg-card p-6 shadow-soft">
-      <div className="flex items-center justify-between gap-4">
+    <div className="rounded-3xl border bg-card p-5 shadow-soft sm:p-6">
+      <div className="flex flex-wrap items-center justify-between gap-4">
         <h2 className="text-lg font-semibold text-foreground">{title}</h2>
         {aside}
       </div>

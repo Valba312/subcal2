@@ -124,7 +124,7 @@ export default function CalculatorPage() {
       <FeatureGate feature="calculator">
       <div className="bg-background py-8 sm:py-10">
         <div className="container flex max-w-6xl flex-col gap-6">
-          <header className="rounded-3xl border bg-card p-6 shadow-soft sm:p-8">
+          <header className="rounded-3xl border bg-card p-5 shadow-soft sm:p-8">
             <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
               <div className="max-w-2xl">
                 <p className="text-sm font-semibold text-primary">SubKeeper</p>
@@ -136,7 +136,7 @@ export default function CalculatorPage() {
                 </p>
               </div>
 
-              <div className="rounded-2xl border bg-muted/40 px-5 py-4">
+              <div className="w-full rounded-2xl border bg-muted/40 px-5 py-4 lg:w-auto">
                 <p className="text-xs font-semibold uppercase text-muted-foreground">Месячный итог</p>
                 <p className="mt-1 text-2xl font-bold text-foreground">{monthlySummary || "0 ₽"}</p>
               </div>
@@ -157,8 +157,8 @@ export default function CalculatorPage() {
             </div>
           </header>
 
-          <section className="grid gap-6 lg:grid-cols-[400px_1fr]">
-            <form onSubmit={handleSubmit} className="space-y-5 rounded-3xl border bg-card p-6 shadow-soft">
+          <section className="grid gap-6 lg:grid-cols-[minmax(0,400px)_minmax(0,1fr)]">
+            <form onSubmit={handleSubmit} className="space-y-5 rounded-3xl border bg-card p-5 shadow-soft sm:p-6">
               <div>
                 <p className="text-lg font-semibold text-foreground">Новая подписка</p>
                 <p className="mt-1 text-sm text-muted-foreground">Заполните стоимость, период и дату следующего списания.</p>
@@ -246,7 +246,7 @@ export default function CalculatorPage() {
             </form>
 
             <div className="space-y-6">
-              <div className="rounded-3xl border bg-card p-6 shadow-soft">
+              <div className="rounded-3xl border bg-card p-5 shadow-soft sm:p-6">
                 <div className="flex items-center justify-between gap-4">
                   <div>
                     <h2 className="text-lg font-semibold text-foreground">Сводка по валютам</h2>
@@ -273,7 +273,7 @@ export default function CalculatorPage() {
                 </div>
               </div>
 
-              <div className="rounded-3xl border bg-card p-6 shadow-soft">
+              <div className="rounded-3xl border bg-card p-5 shadow-soft sm:p-6">
                 <div className="flex items-center justify-between gap-4">
                   <div>
                     <h2 className="text-lg font-semibold text-foreground">Ваши подписки</h2>
@@ -292,11 +292,11 @@ export default function CalculatorPage() {
                       className="grid gap-4 rounded-2xl border bg-background p-4 text-sm transition hover:border-primary/40"
                     >
                       <div className="flex flex-wrap items-start justify-between gap-3">
-                        <div>
+                        <div className="min-w-0">
                           <p className="text-base font-semibold text-foreground">{subscription.name}</p>
                           <p className="mt-1 text-xs text-muted-foreground">{subscription.frequencyLabel}</p>
                         </div>
-                        <div className="text-right">
+                        <div className="min-w-0 text-left sm:text-right">
                           <p className="text-base font-semibold text-foreground">
                             {formatMoney(subscription.cost)} {subscription.currency}
                           </p>
@@ -306,12 +306,12 @@ export default function CalculatorPage() {
                         </div>
                       </div>
 
-                      <div className="flex flex-wrap items-center justify-between gap-3 border-t pt-3 text-xs text-muted-foreground">
+                      <div className="flex flex-col gap-3 border-t pt-3 text-xs text-muted-foreground sm:flex-row sm:items-center sm:justify-between">
                         <span>Следующий платеж: {dayMonthFormatter.format(new Date(subscription.nextPaymentDate))}</span>
                         <button
                           type="button"
                           onClick={() => handleDelete(subscription.id)}
-                          className="inline-flex items-center gap-2 rounded-xl border px-3 py-1.5 font-semibold text-destructive transition hover:bg-destructive/10"
+                          className="inline-flex w-full items-center justify-center gap-2 rounded-xl border px-3 py-1.5 font-semibold text-destructive transition hover:bg-destructive/10 sm:w-auto"
                         >
                           <Trash2 className="h-3.5 w-3.5" aria-hidden="true" />
                           Удалить
@@ -353,7 +353,7 @@ function SummaryCard({ label, value, icon }: { label: string; value: string; ico
 
 function SummaryLine({ label, value }: { label: string; value: string }) {
   return (
-    <p className="flex items-center justify-between gap-4">
+    <p className="flex flex-wrap items-center justify-between gap-2">
       <span className="text-muted-foreground">{label}</span>
       <span className="font-semibold">{value}</span>
     </p>

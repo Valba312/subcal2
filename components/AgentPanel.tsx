@@ -16,7 +16,7 @@ type AgentPanelProps = {
 
 function SectionCard({ title, children }: { title: string; children: ReactNode }) {
   return (
-    <section className="rounded-3xl border border-slate-200/80 bg-white/90 p-6 shadow-lg dark:border-slate-800 dark:bg-slate-900">
+    <section className="rounded-3xl border border-slate-200/80 bg-white/90 p-4 shadow-lg sm:p-6 dark:border-slate-800 dark:bg-slate-900">
       <header className="flex items-center justify-between">
         <h3 className="text-base font-semibold text-slate-900 dark:text-white">{title}</h3>
         <div className="h-2 w-2 rounded-full bg-primary" />
@@ -186,7 +186,7 @@ export default function AgentPanel({ subs, onDisable, onSwitchToAnnual, onIgnore
           return (
             <li
               key={adviceKey}
-              className="rounded-2xl border border-slate-200/80 bg-white/90 p-5 text-slate-900 shadow-sm dark:border-slate-700/70 dark:bg-slate-900 dark:text-white"
+              className="rounded-2xl border border-slate-200/80 bg-white/90 p-4 text-slate-900 shadow-sm sm:p-5 dark:border-slate-700/70 dark:bg-slate-900 dark:text-white"
             >
               <div className="flex flex-col gap-2">
                 <div className="flex flex-wrap items-center justify-between gap-4">
@@ -290,20 +290,20 @@ export default function AgentPanel({ subs, onDisable, onSwitchToAnnual, onIgnore
       <SectionCard title="Экономия">
         {summary ? (
           <div className="flex flex-col gap-6 text-sm font-semibold text-slate-800 dark:text-white">
-            <div className="flex flex-wrap items-center gap-6">
+            <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center sm:gap-6">
               <div className="rounded-2xl bg-white/70 px-4 py-3 shadow-inner dark:bg-slate-900/60">
                 <p className="text-xs uppercase tracking-wide text-slate-500">До</p>
-                <p className="text-2xl">{summary.before}</p>
+                <p className="text-xl sm:text-2xl">{summary.before}</p>
               </div>
               <span className="text-lg text-slate-400">→</span>
               <div className="rounded-2xl bg-white/70 px-4 py-3 shadow-inner dark:bg-slate-900/60">
                 <p className="text-xs uppercase tracking-wide text-slate-500">После</p>
-                <p className="text-2xl">{summary.after}</p>
+                <p className="text-xl sm:text-2xl">{summary.after}</p>
               </div>
               <span className="text-lg text-slate-400">=</span>
               <div className="relative rounded-2xl bg-gradient-to-br from-emerald-500 to-lime-400 px-5 py-3 text-white shadow-lg">
                 <p className="text-xs uppercase tracking-wide text-white/80">Экономия</p>
-                <p className="text-2xl">{summary.saving}/мес</p>
+                <p className="text-xl sm:text-2xl">{summary.saving}/мес</p>
                 <div className="absolute -right-2 -top-2 h-3 w-3 animate-ping rounded-full bg-white/70" />
               </div>
             </div>
@@ -315,12 +315,12 @@ export default function AgentPanel({ subs, onDisable, onSwitchToAnnual, onIgnore
                 </div>
                 <div className="divide-y divide-slate-100 dark:divide-slate-800">
                   {topSavings.map((saving) => (
-                    <div key={saving.title} className="flex items-center justify-between px-4 py-2 text-slate-700 dark:text-slate-200">
-                      <div>
+                    <div key={saving.title} className="flex flex-col gap-2 px-4 py-2 text-slate-700 sm:flex-row sm:items-center sm:justify-between dark:text-slate-200">
+                      <div className="min-w-0">
                         <p className="font-medium">{saving.title}</p>
                         <p className="text-xs text-slate-500">{saving.detail}</p>
                       </div>
-                      <span className="text-base text-emerald-500">−{formatMoney(saving.saving)} ₽/мес</span>
+                      <span className="shrink-0 text-base text-emerald-500">−{formatMoney(saving.saving)} ₽/мес</span>
                     </div>
                   ))}
                 </div>
