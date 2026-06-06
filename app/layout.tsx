@@ -1,7 +1,7 @@
 // app/layout.tsx
 import "./globals.css";
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
+import localFont from "next/font/local";
 
 import Header from "./components/Header";
 import { AuthProvider } from "../components/auth-provider";
@@ -10,7 +10,15 @@ import { PublicConfigProvider } from "../components/public-config-provider";
 import { ThemeProvider } from "../components/ui/theme-provider";
 import { Toaster } from "../components/ui/toaster";
 
-const fontSans = Inter({ subsets: ["cyrillic", "latin", "latin-ext"], variable: "--font-sans", display: "swap" });
+const fontSans = localFont({
+  src: [
+    { path: "../public/fonts/Inter-Regular.woff2", weight: "400", style: "normal" },
+    { path: "../public/fonts/Inter-Medium.woff2", weight: "500", style: "normal" },
+    { path: "../public/fonts/Inter-Bold.woff2", weight: "700", style: "bold" },
+  ],
+  variable: "--font-sans",
+  display: "swap",
+});
 
 export const metadata: Metadata = {
   title: "SubKeeper — калькулятор подписок",
