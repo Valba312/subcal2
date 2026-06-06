@@ -1,22 +1,23 @@
 name: subkeeper
 
-# Build using the repository Dockerfile to ensure Node 22 and our image configuration
+# CRITICAL: Build ONLY from Dockerfile to ensure Node 22 (required by dependencies)
 build:
   type: docker
-  dockerfile: Dockerfile
+  dockerfile: ./Dockerfile
+  context: ./
 
 run:
-  # Command to run the app inside the built image
   command: sh -c "node scripts/ensure-sqlite-schema.mjs && sh ./scripts/start.sh"
   env:
     HOME: /tmp
     NPM_CONFIG_CACHE: /tmp/.npm
+    NODE_ENV: production
     PORT: "10000"
     AUTOBUILD: "false"
   ports:
     - "10000:10000"
+  restart_policy: always
 
 resources:
-  # Increase if you see OOM/503; set to 1G for debugging
   memory: 1G
   cpu: 0.5

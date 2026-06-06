@@ -1,37 +1,53 @@
-Краткие инструкции по локальному запуску, диагностике 503 и деплою
+## Развёртывание SubKeeper на Amvera и других облачных хостингах
 
-Локальный запуск (production образ):
+### Критически важно для успешного деплоя
+
+**Обязательно используйте `amvera.yml`** — проект требует Node 22, но платформа может попытаться собрать с Node 20. Конфигурация `amvera.yml` ПРИНУДИТЕЛЬНО указывает платформе собирать ваш проект из `Dockerfile`, что гарантирует использование Node 22.
+
+### Инструкции для Amvera
+
+1. **Загрузите конфиг**: скопируйте содержимое [subcal2/amvera.yml](amvera.yml) в панель Amvera (раздел "Конфигурация" или "amvera.yml").
+2. **Убедитесь, что используется Dockerfile**:
+   - В панели Amvera выберите режим сборки → **"Build from Dockerfile"** (или аналогичный).
+   - Путь до Dockerfile: `./Dockerfile` (или просто `Dockerfile`).
+3. **Установите переменные окружения** (если панель не читает из `amvera.yml`):
+   - `HOME=/tmp`
+   - `NPM_CONFIG_CACHE=/tmp/.npm`
+   - `NODE_ENV=production`
+   - `PORT=10000`
+   - `AUTOBUILD=false`
+4. **Увеличьте ресурсы** (если видите 503/OOM):
+   - Memory: **1G** (можно позже уменьшить до 512M после успешного запуска).
+   - CPU: **0.5** или больше.
+5. **Нажмите "Пересобрать" / "Redeploy"** и дождитесь завершения.
+
+### Почему это нужно
+
+- `amvera.yml` с `type: docker` гарантирует, что платформа собирает образ из вашего `Dockerfile`, в котором указан `node:22-alpine`.
+- `.npmrc` содержит `engine-strict=false`, чтобы npm не отказывался, если по ошибке все ещё используется Node 20.
+- `HOME=/tmp` и `NPM_CONFIG_CACHE=/tmp/.npm` предотвращают ошибки записи логов npm в недоступные директории (`/.npm`).
+- `scripts/start.sh` по умолчанию отказывается выполнять долгие install/build (AUTOBUILD=false) — они выполняются в `Dockerfile` во время сборки образа.
+
+### Локальная проверка (с Docker)
+
 ```bash
 # Собрать образ
-docker build -t subkeeper:local ./subcal2
+DOCKER_BUILDKIT=0 docker build --progress=plain -t subkeeper:local ./subcal2
 
-# Запустить контейнер (порт 10000)
-docker run --rm -p 10000:10000 --name subkeeper_local subkeeper:local
+# Запустить контейнер
+docker run --rm -p 10000:10000 subkeeper:local
 ```
 
-Локальный запуск (без Docker):
-```bash
-cd subcal2
-PORT=10000 HOME=/tmp npm start --loglevel=verbose
-```
+### Если после этого всё ещё 503 или SIGTERM
 
-Диагностика ошибок и логов:
-- Просмотреть логи контейнера:
-```bash
-docker ps -a
-docker logs <container-id>
-```
-- Проверить, что `ensure-sqlite-schema.mjs` выполняется:
-```bash
-node scripts/ensure-sqlite-schema.mjs
-```
-- Проверить наличие и права на npm кеш:
-```bash
-docker exec -it <container-id> sh -c 'ls -la $HOME/.npm || ls -la /.npm || true'
-```
+1. Проверьте логи платформы:
+   - В панели Amvera откройте "Логи" / "Logs" → скопируйте последние 200 строк.
+   - Проверьте, видите ли вы "node: v22" или "node: v20" — если v20, значит Dockerfile всё ещё не используется.
+2. Скачайте npm debug лог (если доступен): файл вида `/tmp/.npm/_logs/...-debug-0.log`.
+3. Пришлите логи в поддержку или свяжитесь с разработчиком.
 
-Amvera / облачный хостинг:
-- Установите переменную `HOME=/tmp` в настройках сервиса (или используйте `ENV HOME=/tmp` в Dockerfile). Уже добавлено в `subcal2/Dockerfile`.
-- Временно поднимите тариф, чтобы исключить проблему с ресурсами (OOM). Если после увеличения ресурсов проект стартует — причина в тарифе.
+### Если вы не видите изменений после пересборки
 
-CI: в `.github/workflows/docker-build-push.yml` добавлен workflow для сборки и пуша образа на Docker Hub.
+1. Очистите кэш платформы (если есть кнопка "Clear cache" / "Очистить кеш").
+2. Удалите старый контейнер / инстанс.
+3. Пересоберите с нуля.
