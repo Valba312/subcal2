@@ -1,17 +1,27 @@
 # Production build
 FROM node:22-alpine AS deps
 WORKDIR /app
+# ensure npm has a writable cache during image build
+ENV HOME=/tmp
+ENV NPM_CONFIG_CACHE=$HOME/.npm
+RUN mkdir -p $NPM_CONFIG_CACHE && chmod -R 0777 $NPM_CONFIG_CACHE || true
 COPY package.json package-lock.json* pnpm-lock.yaml* yarn.lock* ./
 RUN npm ci || yarn || pnpm i
 
 FROM node:22-alpine AS builder
 WORKDIR /app
+# ensure npm has a writable cache during build phase
+ENV HOME=/tmp
+ENV NPM_CONFIG_CACHE=$HOME/.npm
 ARG DATABASE_URL=file:/tmp/subkeeper-build.db
 ENV DATABASE_URL=$DATABASE_URL
+RUN mkdir -p $NPM_CONFIG_CACHE && chmod -R 0777 $NPM_CONFIG_CACHE || true
 COPY --from=deps /app/node_modules ./node_modules
 COPY . ./
 RUN mkdir -p public
 RUN npm run prisma:generate
+# Update browserslist DB to avoid warnings and potential build failures
+RUN npx update-browserslist-db@latest --update-db || true
 RUN npm run build
 
 FROM node:22-alpine AS runner
