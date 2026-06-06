@@ -15,6 +15,9 @@ RUN npm ci --prefer-offline --no-audit
 # Copy source code
 COPY . .
 
+# Set DATABASE_URL for build process
+ENV DATABASE_URL=file:/tmp/build.db
+
 # Build prisma and next
 RUN npm run prisma:generate
 RUN npm run build
@@ -29,6 +32,7 @@ ENV NODE_ENV=production
 ENV npm_config_cache=/tmp/.npm
 ENV HOME=/tmp
 ENV PORT=3000
+ENV DATABASE_URL=file:/var/data/subkeeper.db
 
 # Create necessary directories
 RUN mkdir -p /tmp/.npm /var/data && chmod -R 0777 /tmp/.npm /var/data
