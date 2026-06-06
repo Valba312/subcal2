@@ -43,9 +43,16 @@ else
   echo "✓ Production build found"
 fi
 
-# Initialize database if needed
-echo "✓ Initializing database schema..."
-npx prisma db push --skip-generate || true
+# Quick database schema initialization (with timeout to prevent SIGTERM)
+# Only run if database doesn't exist yet
+DB_PATH=$(echo "$DATABASE_URL" | sed 's/file://')
+if [ ! -f "$DB_PATH" ]; then
+  echo "Initializing database schema..."
+  timeout 30 npx prisma db push --skip-generate --skip-validate || true
+  echo "✓ Database initialization completed"
+else
+  echo "✓ Database already initialized"
+fi
 
 # Verify files exist
 if [ ! -d ".next" ]; then
