@@ -51,17 +51,17 @@ export async function GET() {
     getClientErrors(20),
   ]);
 
-  const monthlyTotals = subscriptions.reduce<Record<string, number>>((totals, subscription) => {
+  const monthlyTotals = subscriptions.reduce((totals, subscription) => {
     totals[subscription.currency] = (totals[subscription.currency] ?? 0) + subscription.cost / subscription.months;
     return totals;
-  }, {});
+  }, {} as Record<string, number>);
 
   const subscriptionsByUser = users.map((user) => {
     const userSubscriptions = subscriptions.filter((subscription) => subscription.userId === user.id);
-    const monthlyByCurrency = userSubscriptions.reduce<Record<string, number>>((totals, subscription) => {
+    const monthlyByCurrency = userSubscriptions.reduce((totals, subscription) => {
       totals[subscription.currency] = (totals[subscription.currency] ?? 0) + subscription.cost / subscription.months;
       return totals;
-    }, {});
+    }, {} as Record<string, number>);
 
     return {
       id: user.id,

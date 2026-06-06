@@ -1,0 +1,30 @@
+meta:
+  environment: node.js
+  tool: npm
+  nodeVersion: 22
+
+build:
+  skip: false
+  command: "npm ci && npm run build"
+  additionalCommands: ""
+  artifacts:
+    - key: .
+      value: /
+
+run:
+  command: "npm run start"
+  scriptName: ""
+  scriptArguments: ""
+  nodeArguments: ""
+  persistenceMount: /data
+  containerPort: 3000
+  env:
+    DATABASE_URL: "file:/data/prisma/dev.db"
+    NODE_ENV: production
+
+notes: |
+  - Use Node.js 22 to avoid engine warnings from some Prisma packages.
+  - Ensure the platform mounts a persistent volume at `/data` and that the
+    `DATABASE_URL` above matches that mount (this file overrides .env during runtime).
+  - If you prefer Docker-based builds, switch to Dockerfile build and ensure
+    ports and persistence are consistent with this config.
