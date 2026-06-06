@@ -5,8 +5,9 @@ export HOME=${HOME:-/tmp}
 export NPM_CONFIG_CACHE=${NPM_CONFIG_CACHE:-/tmp/.npm}
 export PORT=${PORT:-3000}
 export NODE_ENV=${NODE_ENV:-production}
+export DATABASE_URL=${DATABASE_URL:-file:/var/data/subkeeper.db}
 
-mkdir -p "$HOME" "$NPM_CONFIG_CACHE" 2>/dev/null || true
+mkdir -p "$HOME" "$NPM_CONFIG_CACHE" /var/data 2>/dev/null || true
 
 # Check if build exists
 if [ ! -f ".next/BUILD_ID" ]; then
