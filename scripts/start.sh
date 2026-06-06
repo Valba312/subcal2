@@ -8,9 +8,9 @@ fi
 export NPM_CONFIG_CACHE="${NPM_CONFIG_CACHE:-$HOME/.npm}"
 mkdir -p "$NPM_CONFIG_CACHE" || true
 
-# Ensure PORT has a default value
+# Ensure PORT has a default value (match Dockerfile default)
 if [ -z "$PORT" ]; then
-  PORT=3000
+  PORT=10000
 fi
 
 echo "Checking for production build in .next..."

@@ -30,4 +30,4 @@ COPY --from=builder /app/scripts ./scripts
 RUN mkdir -p /var/data
 RUN mkdir -p $NPM_CONFIG_CACHE && chmod -R 0777 $NPM_CONFIG_CACHE || true
 EXPOSE 10000
-CMD ["sh","-c","node scripts/ensure-sqlite-schema.mjs && npx next start -H 0.0.0.0 -p ${PORT:-10000}"]
+CMD ["sh","-c","node scripts/ensure-sqlite-schema.mjs && sh ./scripts/start.sh"]
