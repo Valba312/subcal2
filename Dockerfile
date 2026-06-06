@@ -54,9 +54,5 @@ RUN chmod +x ./scripts/start.sh
 # Expose port (match Amvera runtime)
 EXPOSE 10000
 
-# Health check (match runtime port)
-HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
-  CMD wget --no-verbose --tries=1 --spider http://localhost:10000/ || exit 1
-
 # Start command - simple and direct
 CMD ["sh", "./scripts/start.sh"]
