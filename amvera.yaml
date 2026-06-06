@@ -1,5 +1,5 @@
 meta:
-  environment: node.js
+  environment: node
   tool: npm
   nodeVersion: 22
   toolchain:
