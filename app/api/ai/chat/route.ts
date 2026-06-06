@@ -66,13 +66,13 @@ const extractServicesFromHistory = (messages: ChatMessage[]): ParsedService[] =>
 };
 
 const buildOptimisationSummary = (services: ParsedService[]): string[] => {
-  const grouped = services.reduce<Record<string, ParsedService[]>>((acc, service) => {
+  const grouped = services.reduce((acc, service) => {
     if (!acc[service.type]) {
       acc[service.type] = [];
     }
     acc[service.type].push(service);
     return acc;
-  }, {});
+  }, {} as Record<string, ParsedService[]>);
 
   const suggestions: string[] = [];
 

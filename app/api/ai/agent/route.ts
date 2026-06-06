@@ -58,14 +58,14 @@ const classifySubscription = (subscription: Subscription): { segment: string; la
 
 const buildMockAgentResponse = (subscriptions: Subscription[]): AgentResponse => {
   const monthlyBefore = subscriptions.reduce((total, item) => total + item.perMonth, 0);
-  const grouped = subscriptions.reduce<Record<string, Subscription[]>>((acc, subscription) => {
+  const grouped = subscriptions.reduce((acc, subscription) => {
     const { segment } = classifySubscription(subscription);
     if (!acc[segment]) {
       acc[segment] = [];
     }
     acc[segment].push(subscription);
     return acc;
-  }, {});
+  }, {} as Record<string, Subscription[]>);
 
   const conflicts: Conflict[] = [];
   const advice: Advice[] = [];

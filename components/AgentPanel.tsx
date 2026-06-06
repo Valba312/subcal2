@@ -99,11 +99,11 @@ export default function AgentPanel({ subs, onDisable, onSwitchToAnnual, onIgnore
     if (!subs.length) {
       return [];
     }
-    const totals = subs.reduce<Record<string, number>>((acc, subscription) => {
+    const totals = subs.reduce((acc, subscription) => {
       const key = subscription.category ?? "Прочее";
       acc[key] = (acc[key] ?? 0) + subscription.perMonth;
       return acc;
-    }, {});
+    }, {} as Record<string, number>);
     const sum = Object.values(totals).reduce((total, value) => total + value, 0);
     if (sum === 0) {
       return [];

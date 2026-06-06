@@ -111,9 +111,9 @@ async function setupAdminTables() {
 
 export async function getFeatureFlags() {
   await ensureAdminTables();
-  const rows = await prisma.$queryRawUnsafe<FeatureFlagRow[]>(
+  const rows = (await prisma.$queryRawUnsafe(
     "SELECT key, label, description, enabled, updatedAt FROM FeatureFlag ORDER BY key"
-  );
+  )) as FeatureFlagRow[];
 
   return rows.map((row) => ({
     ...row,
@@ -133,9 +133,9 @@ export async function updateFeatureFlag(key: string, enabled: boolean) {
 
 export async function getActiveContacts() {
   await ensureAdminTables();
-  const rows = await prisma.$queryRawUnsafe<PublicContactRow[]>(
+  const rows = (await prisma.$queryRawUnsafe(
     "SELECT id, title, value, href, isActive, createdAt FROM AppContact WHERE isActive = 1 ORDER BY createdAt DESC"
-  );
+  )) as PublicContactRow[];
 
   return rows.map((row) => ({
     ...row,
@@ -145,9 +145,9 @@ export async function getActiveContacts() {
 
 export async function getAllContacts() {
   await ensureAdminTables();
-  const rows = await prisma.$queryRawUnsafe<PublicContactRow[]>(
+  const rows = (await prisma.$queryRawUnsafe(
     "SELECT id, title, value, href, isActive, createdAt FROM AppContact ORDER BY createdAt DESC"
-  );
+  )) as PublicContactRow[];
 
   return rows.map((row) => ({
     ...row,
@@ -217,10 +217,10 @@ export async function recordClientError(input: {
 
 export async function getClientErrors(limit = 30) {
   await ensureAdminTables();
-  return prisma.$queryRawUnsafe<ClientErrorRecord[]>(
+  return (await prisma.$queryRawUnsafe(
     "SELECT id, message, stack, path, userAgent, userId, severity, createdAt, resolvedAt FROM ClientError ORDER BY createdAt DESC LIMIT ?",
     limit
-  );
+  )) as ClientErrorRecord[];
 }
 
 export async function resolveClientError(id: number) {
