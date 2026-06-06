@@ -4,9 +4,8 @@
   "private": true,
   "scripts": {
     "dev": "sh ./scripts/dev.sh",
-    "build": "prisma generate && next build",
+    "build": "sh -c \"DATABASE_URL=${DATABASE_URL:-file:/data/prisma/dev.db} prisma generate\" && next build",
     "prisma:generate": "prisma generate",
-    "postinstall": "prisma generate",
     "start": "sh ./scripts/start.sh",
     "lint": "next lint",
     "test": "vitest run"

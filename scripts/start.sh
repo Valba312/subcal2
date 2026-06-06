@@ -1,4 +1,13 @@
 #!/bin/sh
+# If HOME is unset or not writable (common in scratch/readonly containers),
+# make npm use a writable temporary location for cache/logs so npm doesn't
+# fail trying to write to '/.npm/_logs'.
+if [ -z "$HOME" ] || [ ! -w "$HOME" ]; then
+  export HOME=/tmp
+fi
+export NPM_CONFIG_CACHE="${NPM_CONFIG_CACHE:-$HOME/.npm}"
+mkdir -p "$NPM_CONFIG_CACHE" || true
+
 # Ensure PORT has a default value
 if [ -z "$PORT" ]; then
   PORT=3000
