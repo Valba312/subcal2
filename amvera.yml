@@ -1,4 +1,6 @@
-name: subkeeper
+meta:
+  name: subkeeper
+  description: SubKeeper - subscription management and analytics platform
 
 # CRITICAL: Build ONLY from Dockerfile to ensure Node 22 (required by dependencies)
 build:
