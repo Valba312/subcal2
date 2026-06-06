@@ -1,11 +1,5 @@
 meta:
-  environment: node
-  tool: npm
-  nodeVersion: 22
-  toolchain:
-    name: node
-    version: 22
-    packageManager: npm
+  toolchain: {}
 
 build:
   skip: false
@@ -27,8 +21,8 @@ run:
     NODE_ENV: production
 
 notes: |
-  - Use Node.js 22 to avoid engine warnings from some Prisma packages.
-  - Ensure the platform mounts a persistent volume at `/data` and that the
-    `DATABASE_URL` above matches that mount (this file overrides .env during runtime).
-  - If you prefer Docker-based builds, switch to Dockerfile build and ensure
-    ports and persistence are consistent with this config.
+  - This configuration includes an empty `meta.toolchain` section to match the
+    platform example. The platform UI may override toolchain details.
+  - Recommended build command: `npm ci && npm run build`.
+  - Ensure a persistent volume is mounted to `/data` and that `DATABASE_URL`
+    points to `file:/data/prisma/dev.db` for production.
