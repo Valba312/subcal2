@@ -7,6 +7,7 @@ export NPM_CONFIG_CACHE=${NPM_CONFIG_CACHE:-/tmp/.npm}
 export PORT=${PORT:-3000}
 export NODE_ENV=${NODE_ENV:-production}
 export DATABASE_URL=${DATABASE_URL:-file:/var/data/subkeeper.db}
+export NEXT_TELEMETRY_DISABLED=1
 
 # Debug logging
 echo "=== SubKeeper Startup ==="
@@ -28,16 +29,23 @@ if [ ! -f ".env" ]; then
   cat > .env << EOF
 DATABASE_URL=$DATABASE_URL
 NODE_ENV=$NODE_ENV
+NEXT_TELEMETRY_DISABLED=1
 EOF
 fi
 
 # Check if build exists
 if [ ! -f ".next/BUILD_ID" ]; then
   echo "⚠️  No production build found. Building..."
+  echo "Starting build at $(date)"
   npm run build
+  echo "Build completed at $(date)"
 else
   echo "✓ Production build found"
 fi
+
+# Initialize database if needed
+echo "✓ Initializing database schema..."
+npx prisma db push --skip-generate || true
 
 # Verify files exist
 if [ ! -d ".next" ]; then
@@ -50,6 +58,7 @@ if [ ! -d "node_modules" ]; then
   exit 1
 fi
 
-echo "✓ Starting Next.js server..."
+echo "✓ All files verified"
+echo "✓ Starting Next.js server at $(date)..."
 # Start Next.js with explicit host and port
 exec node_modules/.bin/next start -H 0.0.0.0 -p "$PORT"
