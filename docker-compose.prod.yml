@@ -1,0 +1,15 @@
+version: '3.8'
+services:
+  app:
+    build: .
+    ports:
+      - "10000:10000"
+    environment:
+      - NODE_ENV=production
+      - HOME=/tmp
+      - NPM_CONFIG_CACHE=/tmp/.npm
+      - DATABASE_URL=file:/var/data/subkeeper.db
+      - PORT=10000
+    volumes:
+      - /var/data:/var/data
+    restart: unless-stopped
