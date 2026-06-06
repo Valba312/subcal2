@@ -1,10 +1,10 @@
 # Production build
-FROM node:20-alpine AS deps
+FROM node:22-alpine AS deps
 WORKDIR /app
 COPY package.json package-lock.json* pnpm-lock.yaml* yarn.lock* ./
 RUN npm ci || yarn || pnpm i
 
-FROM node:20-alpine AS builder
+FROM node:22-alpine AS builder
 WORKDIR /app
 ARG DATABASE_URL=file:/tmp/subkeeper-build.db
 ENV DATABASE_URL=$DATABASE_URL
@@ -14,7 +14,7 @@ RUN mkdir -p public
 RUN npm run prisma:generate
 RUN npm run build
 
-FROM node:20-alpine AS runner
+FROM node:22-alpine AS runner
 WORKDIR /app
 ENV NODE_ENV=production
 # Ensure a writable HOME for npm to place cache/logs (prevents writing to /.npm)
