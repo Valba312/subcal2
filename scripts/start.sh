@@ -14,23 +14,32 @@ if [ -z "$PORT" ]; then
 fi
 
 echo "Checking for production build in .next..."
-# If BUILD_ID is missing, it's not a valid production build — run build
+# If BUILD_ID is missing, it's not a valid production build.
+# Many PaaS builders time out if 'start' performs long installs/builds.
+# By default we refuse to auto-install/build and exit with guidance.
+# To allow auto-install/build during start, set AUTOBUILD=true in env.
 if [ ! -f ".next/BUILD_ID" ]; then
-  echo "Production BUILD_ID not found — preparing build environment"
-  # Ensure dependencies are installed (some platforms run start in a fresh container)
-  if [ ! -d "node_modules" ]; then
-    echo "node_modules not found — installing dependencies (npm ci)..."
-    npm ci || npm install || {
-      echo "Dependency install failed — aborting start" >&2
+  echo "Production BUILD_ID not found."
+  if [ "${AUTOBUILD:-false}" = "true" ]; then
+    echo "AUTOBUILD=true — proceeding to install dependencies and build."
+    if [ ! -d "node_modules" ]; then
+      echo "node_modules not found — installing dependencies (npm ci)..."
+      npm ci || npm install || {
+        echo "Dependency install failed — aborting start" >&2
+        exit 1
+      }
+    fi
+
+    echo "Running 'npm run build'"
+    npm run build || {
+      echo "Build failed — aborting start" >&2
       exit 1
     }
-  fi
-
-  echo "Running 'npm run build'"
-  npm run build || {
-    echo "Build failed — aborting start" >&2
+  else
+    echo "AUTOBUILD not enabled — aborting start to avoid long-running installs/builds."
+    echo "Set AUTOBUILD=true to enable automatic install+build in start, or build the image beforehand."
     exit 1
-  }
+  fi
 else
   echo "Found .next/BUILD_ID — assuming production build is present."
 fi
