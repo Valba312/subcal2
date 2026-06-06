@@ -31,7 +31,7 @@ WORKDIR /app
 ENV NODE_ENV=production
 ENV npm_config_cache=/tmp/.npm
 ENV HOME=/tmp
-ENV PORT=3000
+ENV PORT=10000
 ENV DATABASE_URL=file:/var/data/subkeeper.db
 
 # Create necessary directories
@@ -51,12 +51,12 @@ RUN chmod -R 0777 /var/data
 # Ensure scripts are executable
 RUN chmod +x ./scripts/start.sh
 
-# Expose port
-EXPOSE 3000
+# Expose port (match Amvera runtime)
+EXPOSE 10000
 
-# Health check
+# Health check (match runtime port)
 HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
-  CMD wget --no-verbose --tries=1 --spider http://localhost:3000/ || exit 1
+  CMD wget --no-verbose --tries=1 --spider http://localhost:10000/ || exit 1
 
 # Start command - simple and direct
 CMD ["sh", "./scripts/start.sh"]
