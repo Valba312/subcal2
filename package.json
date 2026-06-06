@@ -3,10 +3,10 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "PORT=${PORT:-3000} next dev -H 0.0.0.0 -p $PORT",
+    "dev": "sh ./scripts/dev.sh",
     "build": "next build",
     "prisma:generate": "prisma generate",
-    "start": "PORT=${PORT:-3000} next start -H 0.0.0.0 -p $PORT",
+    "start": "sh ./scripts/start.sh",
     "lint": "next lint",
     "test": "vitest run"
   },
