@@ -22,9 +22,6 @@ ENV DATABASE_URL=file:/tmp/build.db
 RUN npm run prisma:generate
 RUN npm run build
 
-# Initialize database schema during build
-RUN mkdir -p /tmp && npx prisma db push --skip-generate --skip-validate || true
-
 # Runtime stage
 FROM node:22-alpine
 
@@ -47,6 +44,9 @@ COPY --from=builder /app/package*.json ./
 COPY --from=builder /app/public ./public
 COPY --from=builder /app/prisma ./prisma
 COPY --from=builder /app/scripts ./scripts
+
+# Ensure proper permissions
+RUN chmod -R 0777 /var/data
 
 # Ensure scripts are executable
 RUN chmod +x ./scripts/start.sh

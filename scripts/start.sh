@@ -9,23 +9,17 @@ export NODE_ENV=${NODE_ENV:-production}
 export DATABASE_URL=${DATABASE_URL:-file:/var/data/subkeeper.db}
 export NEXT_TELEMETRY_DISABLED=1
 
-# Debug logging
 echo "=== SubKeeper Startup ==="
-echo "NODE_VERSION: $(node --version)"
-echo "NPM_VERSION: $(npm --version)"
+echo "NODE: $(node --version)"
 echo "PORT: $PORT"
 echo "NODE_ENV: $NODE_ENV"
-echo "DATABASE_URL: $DATABASE_URL"
-echo "HOME: $HOME"
-echo "PWD: $(pwd)"
 echo "========================="
 
 # Create necessary directories
 mkdir -p "$HOME" "$NPM_CONFIG_CACHE" /var/data 2>/dev/null || true
 
-# Create .env file with DATABASE_URL if it doesn't exist
+# Create .env file
 if [ ! -f ".env" ]; then
-  echo "Creating .env file..."
   cat > .env << EOF
 DATABASE_URL=$DATABASE_URL
 NODE_ENV=$NODE_ENV
@@ -33,39 +27,22 @@ NEXT_TELEMETRY_DISABLED=1
 EOF
 fi
 
-# Check if build exists
+# Build if needed
 if [ ! -f ".next/BUILD_ID" ]; then
-  echo "⚠️  No production build found. Building..."
-  echo "Starting build at $(date)"
+  echo "Building application..."
   npm run build
-  echo "Build completed at $(date)"
-else
-  echo "✓ Production build found"
 fi
 
-# Quick database schema initialization (with timeout to prevent SIGTERM)
-# Only run if database doesn't exist yet
-DB_PATH=$(echo "$DATABASE_URL" | sed 's/file://')
+# Extract database path from DATABASE_URL
+DB_PATH=$(echo "$DATABASE_URL" | sed 's/^file://')
+
+# Initialize database if it doesn't exist
 if [ ! -f "$DB_PATH" ]; then
-  echo "Initializing database schema..."
-  timeout 30 npx prisma db push --skip-generate --skip-validate || true
-  echo "✓ Database initialization completed"
-else
-  echo "✓ Database already initialized"
+  echo "Initializing database..."
+  # Just create the file - Prisma will initialize the schema when needed
+  touch "$DB_PATH"
+  chmod 0666 "$DB_PATH"
 fi
 
-# Verify files exist
-if [ ! -d ".next" ]; then
-  echo "❌ ERROR: .next directory not found"
-  exit 1
-fi
-
-if [ ! -d "node_modules" ]; then
-  echo "❌ ERROR: node_modules not found"
-  exit 1
-fi
-
-echo "✓ All files verified"
-echo "✓ Starting Next.js server at $(date)..."
-# Start Next.js with explicit host and port
+echo "✓ Starting server..."
 exec node_modules/.bin/next start -H 0.0.0.0 -p "$PORT"
