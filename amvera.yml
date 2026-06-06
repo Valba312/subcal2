@@ -1,26 +1,10 @@
 meta:
   name: subkeeper
-  description: SubKeeper - subscription management and analytics platform
   toolchain: docker
 
-# CRITICAL: Build ONLY from Dockerfile to ensure Node 22 (required by dependencies)
 build:
   type: docker
   dockerfile: ./Dockerfile
-  context: ./
 
 run:
-  command: sh -c "node scripts/ensure-sqlite-schema.mjs && sh ./scripts/start.sh"
-  env:
-    HOME: /tmp
-    NPM_CONFIG_CACHE: /tmp/.npm
-    NODE_ENV: production
-    PORT: "10000"
-    AUTOBUILD: "false"
-  ports:
-    - "10000:10000"
-  restart_policy: always
-
-resources:
-  memory: 1G
-  cpu: 0.5
+  containerPort: 3000

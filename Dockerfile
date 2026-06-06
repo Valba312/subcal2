@@ -1,43 +1,52 @@
-# Production build
-FROM node:22-alpine AS deps
-WORKDIR /app
-# ensure npm has a writable cache during image build
-ENV HOME=/tmp
-ENV NPM_CONFIG_CACHE=$HOME/.npm
-RUN mkdir -p $NPM_CONFIG_CACHE && chmod -R 0777 $NPM_CONFIG_CACHE || true
-COPY package.json package-lock.json* pnpm-lock.yaml* yarn.lock* ./
-RUN npm ci || yarn || pnpm i
-
+# Build stage
 FROM node:22-alpine AS builder
 WORKDIR /app
-# ensure npm has a writable cache during build phase
+
+# Set npm cache to /tmp to avoid permission issues
+ENV npm_config_cache=/tmp/.npm
 ENV HOME=/tmp
-ENV NPM_CONFIG_CACHE=$HOME/.npm
-ARG DATABASE_URL=file:/tmp/subkeeper-build.db
-ENV DATABASE_URL=$DATABASE_URL
-RUN mkdir -p $NPM_CONFIG_CACHE && chmod -R 0777 $NPM_CONFIG_CACHE || true
-COPY --from=deps /app/node_modules ./node_modules
-COPY . ./
-RUN mkdir -p public
+
+# Copy package files
+COPY package*.json ./
+
+# Install dependencies
+RUN npm ci --prefer-offline --no-audit
+
+# Copy source code
+COPY . .
+
+# Build prisma and next
 RUN npm run prisma:generate
-# Update browserslist DB to avoid warnings and potential build failures
-RUN npx update-browserslist-db@latest --update-db || true
 RUN npm run build
 
-FROM node:22-alpine AS runner
+# Runtime stage
+FROM node:22-alpine
+
 WORKDIR /app
+
+# Essential environment variables
 ENV NODE_ENV=production
-# Ensure a writable HOME for npm to place cache/logs (prevents writing to /.npm)
+ENV npm_config_cache=/tmp/.npm
 ENV HOME=/tmp
-ENV NPM_CONFIG_CACHE=$HOME/.npm
-ENV DATABASE_URL=file:/var/data/subkeeper.db
+ENV PORT=3000
+
+# Create necessary directories
+RUN mkdir -p /tmp/.npm /var/data && chmod -R 0777 /tmp/.npm /var/data
+
+# Copy from builder
 COPY --from=builder /app/.next ./.next
-COPY --from=builder /app/package.json ./package.json
 COPY --from=builder /app/node_modules ./node_modules
+COPY --from=builder /app/package*.json ./
 COPY --from=builder /app/public ./public
 COPY --from=builder /app/prisma ./prisma
 COPY --from=builder /app/scripts ./scripts
-RUN mkdir -p /var/data
-RUN mkdir -p $NPM_CONFIG_CACHE && chmod -R 0777 $NPM_CONFIG_CACHE || true
-EXPOSE 10000
-CMD ["sh","-c","node scripts/ensure-sqlite-schema.mjs && sh ./scripts/start.sh"]
+
+# Expose port
+EXPOSE 3000
+
+# Health check
+HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
+  CMD wget --no-verbose --tries=1 --spider http://localhost:3000/ || exit 1
+
+# Start command - simple and direct
+CMD ["node_modules/.bin/next", "start", "-H", "0.0.0.0", "-p", "3000"]
