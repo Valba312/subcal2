@@ -5,7 +5,7 @@ import { PrismaBetterSqlite3 } from "@prisma/adapter-better-sqlite3";
 import * as Prisma from "@prisma/client";
 
 const globalForPrisma = globalThis as typeof globalThis & {
-  prisma?: Prisma.PrismaClient;
+  prisma?: any;
 };
 
 const projectRoot = path.resolve(process.cwd());
@@ -58,9 +58,11 @@ const adapter = new PrismaBetterSqlite3({
   url: resolveSqliteUrl(),
 });
 
+const PrismaClientClass = (Prisma as any).PrismaClient || (Prisma as any).default?.PrismaClient || (Prisma as any).default;
+
 export const prisma =
   globalForPrisma.prisma ??
-  new Prisma.PrismaClient({
+  new PrismaClientClass({
     adapter,
     log: process.env.NODE_ENV === "development" ? ["error", "warn"] : ["error"],
   });
