@@ -5,7 +5,6 @@ export HOME=${HOME:-/tmp}
 export NPM_CONFIG_CACHE=${NPM_CONFIG_CACHE:-/tmp/.npm}
 export PORT=${PORT:-3000}
 export NODE_ENV=${NODE_ENV:-production}
-export DATABASE_URL=${DATABASE_URL:-postgresql://subkeeper:subkeeper@localhost:5432/subkeeper?schema=public}
 export NEXT_TELEMETRY_DISABLED=1
 
 echo "=== SubKeeper Startup ==="
@@ -15,6 +14,11 @@ echo "NODE_ENV: $NODE_ENV"
 echo "========================="
 
 mkdir -p "$HOME" "$NPM_CONFIG_CACHE" 2>/dev/null || true
+
+if [ -z "$DATABASE_URL" ]; then
+  echo "DATABASE_URL is required at runtime. Set it in Amvera on stage 'Запуск'."
+  exit 1
+fi
 
 if [ ! -f ".env" ]; then
   cat > .env << EOF
