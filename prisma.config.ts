@@ -2,8 +2,8 @@ import "dotenv/config";
 
 import { defineConfig } from "prisma/config";
 
-// Use environment DATABASE_URL when available, otherwise fall back to a file-based DB
-const DATABASE_URL = process.env.DATABASE_URL || "file:/data/prisma/dev.db";
+const DATABASE_URL =
+  process.env.DATABASE_URL || "postgresql://subkeeper:subkeeper@localhost:5432/subkeeper?schema=public";
 
 export default defineConfig({
   schema: "prisma/schema.prisma",

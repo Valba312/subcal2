@@ -1,6 +1,6 @@
 # SubKeeper — калькулятор подписок
 
-Next.js 14 (App Router) + TypeScript, Tailwind, shadcn/ui-style, Prisma + SQLite, Zustand, react-hook-form + zod, i18n (ru/en), Chart.js, Vitest.
+Next.js 14 (App Router) + TypeScript, Tailwind, shadcn/ui-style, Prisma + PostgreSQL, Zustand, react-hook-form + zod, i18n (ru/en), Chart.js, Vitest.
 
 ## Быстрый старт
 

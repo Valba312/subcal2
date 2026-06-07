@@ -16,7 +16,7 @@ RUN npm ci --prefer-offline --no-audit
 COPY . .
 
 # Set DATABASE_URL for build process
-ENV DATABASE_URL=file:/tmp/build.db
+ENV DATABASE_URL=postgresql://subkeeper:subkeeper@localhost:5432/subkeeper?schema=public
 
 # Build prisma and next
 RUN npm run prisma:generate
@@ -32,10 +32,10 @@ ENV NODE_ENV=production
 ENV npm_config_cache=/tmp/.npm
 ENV HOME=/tmp
 ENV PORT=10000
-ENV DATABASE_URL=file:/var/data/subkeeper.db
+ENV DATABASE_URL=postgresql://subkeeper:subkeeper@db:5432/subkeeper?schema=public
 
 # Create necessary directories
-RUN mkdir -p /tmp/.npm /var/data && chmod -R 0777 /tmp/.npm /var/data
+RUN mkdir -p /tmp/.npm && chmod -R 0777 /tmp/.npm
 
 # Copy from builder
 COPY --from=builder /app/.next ./.next
@@ -44,9 +44,6 @@ COPY --from=builder /app/package*.json ./
 COPY --from=builder /app/public ./public
 COPY --from=builder /app/prisma ./prisma
 COPY --from=builder /app/scripts ./scripts
-
-# Ensure proper permissions
-RUN chmod -R 0777 /var/data
 
 # Ensure scripts are executable
 RUN chmod +x ./scripts/start.sh

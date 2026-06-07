@@ -1,7 +1,7 @@
-import path from "node:path";
 import fs from "node:fs";
+import path from "node:path";
 
-import { PrismaBetterSqlite3 } from "@prisma/adapter-better-sqlite3";
+import { PrismaPg } from "@prisma/adapter-pg";
 import * as Prisma from "@prisma/client";
 
 const globalForPrisma = globalThis as typeof globalThis & {
@@ -33,29 +33,18 @@ const readDatabaseUrlFromEnvFile = () => {
   }
 };
 
-const resolveSqliteUrl = () => {
+const resolveDatabaseUrl = () => {
   const rawUrl = process.env.DATABASE_URL ?? readDatabaseUrlFromEnvFile();
 
   if (!rawUrl) {
     throw new Error("DATABASE_URL is not set");
   }
 
-  if (rawUrl === ":memory:") {
-    return rawUrl;
-  }
-
-  if (rawUrl.startsWith("file:")) {
-    const filePath = rawUrl.slice("file:".length);
-    return path.isAbsolute(filePath)
-      ? filePath
-      : path.resolve(path.dirname(envFilePath), filePath);
-  }
-
   return rawUrl;
 };
 
-const adapter = new PrismaBetterSqlite3({
-  url: resolveSqliteUrl(),
+const adapter = new PrismaPg({
+  connectionString: resolveDatabaseUrl(),
 });
 
 const PrismaClientClass = (Prisma as any).PrismaClient || (Prisma as any).default?.PrismaClient || (Prisma as any).default;

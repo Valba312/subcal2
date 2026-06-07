@@ -31,9 +31,6 @@ export type ClientErrorRecord = {
   resolvedAt: string | null;
 };
 
-type FeatureFlagRow = Omit<FeatureFlag, "enabled"> & { enabled: number };
-type PublicContactRow = Omit<PublicContact, "isActive"> & { isActive: number };
-
 const defaultFeatures: Array<Omit<FeatureFlag, "enabled" | "updatedAt">> = [
   {
     key: "calculator",
@@ -60,135 +57,102 @@ export const ensureAdminTables = () => {
 };
 
 async function setupAdminTables() {
-  await prisma.$executeRawUnsafe(`
-    CREATE TABLE IF NOT EXISTS FeatureFlag (
-      key TEXT PRIMARY KEY,
-      label TEXT NOT NULL,
-      description TEXT NOT NULL,
-      enabled INTEGER NOT NULL DEFAULT 1,
-      updatedAt DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
+  await Promise.all(
+    defaultFeatures.map((feature) =>
+      prisma.featureFlag.upsert({
+        where: { key: feature.key },
+        update: {},
+        create: { ...feature, enabled: true },
+      })
     )
-  `);
-
-  await prisma.$executeRawUnsafe(`
-    CREATE TABLE IF NOT EXISTS AppContact (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      title TEXT NOT NULL,
-      value TEXT NOT NULL,
-      href TEXT,
-      isActive INTEGER NOT NULL DEFAULT 1,
-      createdAt DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-      updatedAt DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
-    )
-  `);
-
-  await prisma.$executeRawUnsafe(`
-    CREATE TABLE IF NOT EXISTS ClientError (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      message TEXT NOT NULL,
-      stack TEXT,
-      path TEXT,
-      userAgent TEXT,
-      userId TEXT,
-      severity TEXT NOT NULL DEFAULT 'critical',
-      createdAt DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-      resolvedAt DATETIME
-    )
-  `);
-
-  for (const feature of defaultFeatures) {
-    await prisma.$executeRawUnsafe(
-      `
-        INSERT OR IGNORE INTO FeatureFlag (key, label, description, enabled)
-        VALUES (?, ?, ?, 1)
-      `,
-      feature.key,
-      feature.label,
-      feature.description
-    );
-  }
+  );
 }
+
+const toIso = (value: Date | null | undefined) => (value ? value.toISOString() : null);
 
 export async function getFeatureFlags() {
   await ensureAdminTables();
-  const rows = (await prisma.$queryRawUnsafe(
-    "SELECT key, label, description, enabled, updatedAt FROM FeatureFlag ORDER BY key"
-  )) as FeatureFlagRow[];
-
+  const rows = await prisma.featureFlag.findMany({ orderBy: { key: "asc" } });
   return rows.map((row) => ({
-    ...row,
-    enabled: Boolean(row.enabled),
+    key: row.key as FeatureKey,
+    label: row.label,
+    description: row.description,
+    enabled: row.enabled,
+    updatedAt: row.updatedAt.toISOString(),
   }));
 }
 
 export async function updateFeatureFlag(key: string, enabled: boolean) {
   await ensureAdminTables();
-  await prisma.$executeRawUnsafe(
-    "UPDATE FeatureFlag SET enabled = ?, updatedAt = CURRENT_TIMESTAMP WHERE key = ?",
-    enabled ? 1 : 0,
-    key
-  );
+  await prisma.featureFlag.update({
+    where: { key },
+    data: { enabled },
+  });
   return getFeatureFlags();
 }
 
 export async function getActiveContacts() {
   await ensureAdminTables();
-  const rows = (await prisma.$queryRawUnsafe(
-    "SELECT id, title, value, href, isActive, createdAt FROM AppContact WHERE isActive = 1 ORDER BY createdAt DESC"
-  )) as PublicContactRow[];
-
+  const rows = await prisma.appContact.findMany({
+    where: { isActive: true },
+    orderBy: { createdAt: "desc" },
+  });
   return rows.map((row) => ({
-    ...row,
-    isActive: Boolean(row.isActive),
+    id: row.id,
+    title: row.title,
+    value: row.value,
+    href: row.href,
+    isActive: row.isActive,
+    createdAt: row.createdAt.toISOString(),
   }));
 }
 
 export async function getAllContacts() {
   await ensureAdminTables();
-  const rows = (await prisma.$queryRawUnsafe(
-    "SELECT id, title, value, href, isActive, createdAt FROM AppContact ORDER BY createdAt DESC"
-  )) as PublicContactRow[];
-
+  const rows = await prisma.appContact.findMany({ orderBy: { createdAt: "desc" } });
   return rows.map((row) => ({
-    ...row,
-    isActive: Boolean(row.isActive),
+    id: row.id,
+    title: row.title,
+    value: row.value,
+    href: row.href,
+    isActive: row.isActive,
+    createdAt: row.createdAt.toISOString(),
   }));
 }
 
 export async function createContact(input: { title: string; value: string; href?: string | null }) {
   await ensureAdminTables();
-  await prisma.$executeRawUnsafe(
-    `
-      INSERT INTO AppContact (title, value, href, isActive)
-      VALUES (?, ?, ?, 1)
-    `,
-    input.title,
-    input.value,
-    input.href ?? null
-  );
+  await prisma.appContact.create({
+    data: {
+      title: input.title,
+      value: input.value,
+      href: input.href ?? null,
+      isActive: true,
+    },
+  });
   return getAllContacts();
 }
 
-export async function updateContact(id: number, input: { title: string; value: string; href?: string | null; isActive: boolean }) {
+export async function updateContact(
+  id: number,
+  input: { title: string; value: string; href?: string | null; isActive: boolean }
+) {
   await ensureAdminTables();
-  await prisma.$executeRawUnsafe(
-    `
-      UPDATE AppContact
-      SET title = ?, value = ?, href = ?, isActive = ?, updatedAt = CURRENT_TIMESTAMP
-      WHERE id = ?
-    `,
-    input.title,
-    input.value,
-    input.href ?? null,
-    input.isActive ? 1 : 0,
-    id
-  );
+  await prisma.appContact.update({
+    where: { id },
+    data: {
+      title: input.title,
+      value: input.value,
+      href: input.href ?? null,
+      isActive: input.isActive,
+    },
+  });
   return getAllContacts();
 }
 
 export async function deleteContact(id: number) {
   await ensureAdminTables();
-  await prisma.$executeRawUnsafe("DELETE FROM AppContact WHERE id = ?", id);
+  await prisma.appContact.delete({ where: { id } });
   return getAllContacts();
 }
 
@@ -201,30 +165,42 @@ export async function recordClientError(input: {
   severity?: string;
 }) {
   await ensureAdminTables();
-  await prisma.$executeRawUnsafe(
-    `
-      INSERT INTO ClientError (message, stack, path, userAgent, userId, severity)
-      VALUES (?, ?, ?, ?, ?, ?)
-    `,
-    input.message,
-    input.stack ?? null,
-    input.path ?? null,
-    input.userAgent ?? null,
-    input.userId ?? null,
-    input.severity ?? "critical"
-  );
+  await prisma.clientError.create({
+    data: {
+      message: input.message,
+      stack: input.stack ?? null,
+      path: input.path ?? null,
+      userAgent: input.userAgent ?? null,
+      userId: input.userId ?? null,
+      severity: input.severity ?? "critical",
+    },
+  });
 }
 
 export async function getClientErrors(limit = 30) {
   await ensureAdminTables();
-  return (await prisma.$queryRawUnsafe(
-    "SELECT id, message, stack, path, userAgent, userId, severity, createdAt, resolvedAt FROM ClientError ORDER BY createdAt DESC LIMIT ?",
-    limit
-  )) as ClientErrorRecord[];
+  const rows = await prisma.clientError.findMany({
+    orderBy: { createdAt: "desc" },
+    take: limit,
+  });
+  return rows.map((row) => ({
+    id: row.id,
+    message: row.message,
+    stack: row.stack,
+    path: row.path,
+    userAgent: row.userAgent,
+    userId: row.userId,
+    severity: row.severity,
+    createdAt: row.createdAt.toISOString(),
+    resolvedAt: toIso(row.resolvedAt),
+  }));
 }
 
 export async function resolveClientError(id: number) {
   await ensureAdminTables();
-  await prisma.$executeRawUnsafe("UPDATE ClientError SET resolvedAt = CURRENT_TIMESTAMP WHERE id = ?", id);
+  await prisma.clientError.update({
+    where: { id },
+    data: { resolvedAt: new Date() },
+  });
   return getClientErrors();
 }
