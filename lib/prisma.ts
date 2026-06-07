@@ -43,19 +43,48 @@ const resolveDatabaseUrl = () => {
   return rawUrl;
 };
 
-const adapter = new PrismaPg({
-  connectionString: resolveDatabaseUrl(),
-});
-
 const PrismaClientClass = (Prisma as any).PrismaClient || (Prisma as any).default?.PrismaClient || (Prisma as any).default;
 
-export const prisma =
-  globalForPrisma.prisma ??
-  new PrismaClientClass({
+const createPrismaClient = () => {
+  const adapter = new PrismaPg({
+    connectionString: resolveDatabaseUrl(),
+  });
+
+  return new PrismaClientClass({
     adapter,
     log: process.env.NODE_ENV === "development" ? ["error", "warn"] : ["error"],
   });
+};
 
 if (process.env.NODE_ENV !== "production") {
-  globalForPrisma.prisma = prisma;
+  globalForPrisma.prisma ??= null;
 }
+
+const getPrismaClient = () => {
+  if (!globalForPrisma.prisma) {
+    globalForPrisma.prisma = createPrismaClient();
+  }
+
+  return globalForPrisma.prisma;
+};
+
+export const prisma = new Proxy({} as any, {
+  get(_target, property) {
+    const client = getPrismaClient();
+    const value = Reflect.get(client, property);
+    return typeof value === "function" ? value.bind(client) : value;
+  },
+  set(_target, property, value) {
+    const client = getPrismaClient();
+    return Reflect.set(client, property, value);
+  },
+  has(_target, property) {
+    return property in getPrismaClient();
+  },
+  ownKeys() {
+    return Reflect.ownKeys(getPrismaClient());
+  },
+  getOwnPropertyDescriptor(_target, property) {
+    return Object.getOwnPropertyDescriptor(getPrismaClient(), property);
+  },
+});
