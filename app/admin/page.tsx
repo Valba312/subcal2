@@ -296,15 +296,15 @@ export default function AdminPage() {
                 <MetricCard title="Критические ошибки" value={openErrors.length.toString()} icon={<AlertTriangle className="h-5 w-5" />} />
               </section>
 
-              <section className="grid gap-6 lg:grid-cols-[0.95fr_1.05fr] lg:items-start">
+              <section className="grid gap-6 lg:grid-cols-[minmax(380px,0.9fr)_minmax(0,1.1fr)] lg:items-start">
                 <Panel title="Закрытие блоков">
                   <div className="mt-4 max-h-[520px] space-y-3 overflow-y-auto pr-1">
                     {stats.features.map((feature) => (
-                      <div key={feature.key} className="rounded-2xl border bg-background p-4">
-                        <div className="flex items-start justify-between gap-4">
-                          <div>
-                            <p className="font-semibold text-foreground">{feature.label}</p>
-                            <p className="mt-1 text-sm text-muted-foreground">{feature.description}</p>
+                      <div key={feature.key} className="min-w-0 rounded-2xl border bg-background p-4">
+                        <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                          <div className="min-w-0 flex-1">
+                            <p className="whitespace-nowrap font-semibold text-foreground">{feature.label}</p>
+                            <p className="mt-1 break-words text-sm text-muted-foreground">{feature.description}</p>
                           </div>
                           <button
                             type="button"
