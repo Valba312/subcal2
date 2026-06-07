@@ -3,6 +3,9 @@ import { NextResponse } from "next/server";
 import { requireAdmin } from "../../../../../lib/server/admin";
 import { deleteContact, updateContact } from "../../../../../lib/server/admin-data";
 
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+
 export async function PATCH(request: Request, { params }: { params: { id: string } }) {
   const admin = await requireAdmin();
   if (!admin) {

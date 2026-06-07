@@ -4,6 +4,9 @@ import { prisma } from "../../../../lib/prisma";
 import { requireUser } from "../../../../lib/server/auth";
 import { DEFAULT_SUBSCRIPTIONS } from "../../../../lib/subscriptions";
 
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+
 export async function POST() {
   const user = await requireUser();
   if (!user) {

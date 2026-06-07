@@ -4,6 +4,9 @@ import { prisma } from "../../../../lib/prisma";
 import { isAdminUser } from "../../../../lib/server/admin";
 import { attachSession, authValidators, verifyPassword } from "../../../../lib/server/auth";
 
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+
 export async function POST(request: Request) {
   try {
     const body = await request.json();

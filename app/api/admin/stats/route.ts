@@ -5,6 +5,9 @@ import { requireAdmin } from "../../../../lib/server/admin";
 import { getAllContacts, getClientErrors, getFeatureFlags } from "../../../../lib/server/admin-data";
 import { getDateInputValue } from "../../../../lib/subscriptions";
 
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+
 export async function GET() {
   const admin = await requireAdmin();
   if (!admin) {
