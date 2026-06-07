@@ -1,10 +1,16 @@
 meta:
-  name: subkeeper
-  toolchain: docker
+  environment: node
+  toolchain:
+    name: npm
+    version: 22
 
 build:
-  type: docker
-  dockerfile: ./Dockerfile
+  additionalCommands: npm run build
+  artifacts:
+    "*": /
+    ".next": /.next
 
 run:
+  command: npm start
+  persistenceMount: /data
   containerPort: 10000
