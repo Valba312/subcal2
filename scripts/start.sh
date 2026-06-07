@@ -29,7 +29,7 @@ if [ ! -f ".next/BUILD_ID" ]; then
   npm run build
 fi
 
-npx prisma db push --skip-generate
+npx prisma db push
 
 echo "Starting server..."
 exec node_modules/.bin/next start -H 0.0.0.0 -p "$PORT"
