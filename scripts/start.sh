@@ -29,8 +29,8 @@ EOF
 fi
 
 if [ ! -f ".next/BUILD_ID" ]; then
-  echo "Building application..."
-  npm run build
+  echo "Missing .next build output. Run the build step before start."
+  exit 1
 fi
 
 echo "Starting server..."
