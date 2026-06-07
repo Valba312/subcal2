@@ -87,10 +87,13 @@
   h2,
   h3,
   p,
-  a,
+  a {
+    overflow-wrap: anywhere;
+  }
+
   button,
   span {
-    overflow-wrap: anywhere;
+    overflow-wrap: normal;
   }
 }
 

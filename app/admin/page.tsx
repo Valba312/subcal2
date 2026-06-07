@@ -310,7 +310,7 @@ export default function AdminPage() {
                             type="button"
                             disabled={pendingAction === `feature-${feature.key}`}
                             onClick={() => updateFeature(feature.key, !feature.enabled)}
-                            className={`shrink-0 rounded-2xl border px-4 py-2 text-sm font-semibold transition ${
+                            className={`shrink-0 whitespace-nowrap rounded-2xl border px-4 py-2 text-sm font-semibold transition ${
                               feature.enabled
                                 ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-600"
                                 : "border-destructive/30 bg-destructive/10 text-destructive"
@@ -389,7 +389,7 @@ export default function AdminPage() {
                               type="button"
                               onClick={() => toggleContact(contact)}
                               disabled={pendingAction === `contact-${contact.id}`}
-                              className="rounded-xl border bg-background px-3 py-1.5 text-xs font-semibold text-foreground transition hover:border-primary hover:text-primary"
+                              className="whitespace-nowrap rounded-xl border bg-background px-3 py-1.5 text-xs font-semibold text-foreground transition hover:border-primary hover:text-primary"
                             >
                               {contact.isActive ? "Скрыть" : "Показать"}
                             </button>
@@ -397,7 +397,7 @@ export default function AdminPage() {
                               type="button"
                               onClick={() => deleteContact(contact.id)}
                               disabled={pendingAction === `contact-${contact.id}`}
-                              className="rounded-xl border border-destructive/20 bg-destructive/5 px-3 py-1.5 text-xs font-semibold text-destructive transition hover:bg-destructive/10"
+                              className="whitespace-nowrap rounded-xl border border-destructive/20 bg-destructive/5 px-3 py-1.5 text-xs font-semibold text-destructive transition hover:bg-destructive/10"
                               aria-label="Удалить контакт"
                             >
                               <Trash2 className="h-3.5 w-3.5" aria-hidden="true" />
